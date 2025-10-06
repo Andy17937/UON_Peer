@@ -1,0 +1,151 @@
+import json
+import random
+
+def generate_emotional_samples(num_samples=200):
+    """
+    Generates a list of emotional input samples with categorized negativity levels.
+    The script now uses three categories: Low, Medium, and High.
+    """
+    # Define an expanded list of user inputs for each negativity level
+    low_inputs = [
+        "I'm not sure which major to choose. Any advice?",
+        "I'm having trouble with question 5 on the history assignment.",
+        "When is the deadline for the final paper?",
+        "Could you help me find some articles on sustainable energy?",
+        "I'm a bit overwhelmed with my current courseload. What are some time management tips?",
+        "How do I access the library's online resources?",
+        "My group project team isn't communicating well. What should I do?",
+        "I need a good topic for my research paper.",
+        "Where can I find information about campus clubs?",
+        "I'm a bit lost on campus, where is the main lecture hall?",
+        "Can you recommend a good study group?",
+        "I'm looking for a part-time job, do you know of any resources?",
+        "How do I sign up for an academic advising session?",
+        "I'm feeling a bit tired after a long day of classes.",
+        "I have a quick question about my student account.",
+        "What are the best places to eat near the library?",
+        "How do I apply for a student visa extension?",
+        "Can you help me with a Python syntax error?",
+        "What's the weather like today?",
+        "How do I get a transcript of my grades?",
+        "What's the best route to get from the student union to the science building?",
+        "I'm trying to register for a class, but it says I need a prerequisite. What should I do?",
+        "I need to print a document. Where are the nearest computer labs?",
+        "What are the university's office hours for the registrar?",
+        "Could you help me brainstorm some ideas for a presentation?",
+        "I'm looking for a tutor in organic chemistry.",
+        "Is there a university shuttle bus schedule available online?",
+        "I'm feeling a bit under the weather. What are the clinic hours?",
+        "What's the process for changing my password?",
+        "Where is the campus bookstore?",
+    ]
+
+    medium_inputs = [
+        "I feel so lonely on campus. It feels like everyone else has friends.",
+        "I'm just really stressed out about my exams next week.",
+        "I can't seem to get a good grade no matter how hard I try.",
+        "My parents are putting a lot of pressure on me to succeed.",
+        "I miss my family and I feel homesick all the time.",
+        "I'm overwhelmed by all the social events and feel like I don't fit in.",
+        "I'm having a lot of anxiety about giving this presentation.",
+        "I feel like I'm not smart enough to be here. I keep questioning my abilities.",
+        "My roommate and I are not getting along at all.",
+        "I feel like my friends are leaving me out of things.",
+        "I'm constantly exhausted and can't focus on my studies.",
+        "I'm worried about my financial situation and affording next semester.",
+        "I'm struggling with a personal issue that's affecting my schoolwork.",
+        "I feel like I'm a fraud and everyone will find out I don't belong here.",
+        "I'm just really down and can't seem to feel happy anymore.",
+        "I feel so disconnected from my classes. It's hard to stay motivated.",
+        "I had a huge fight with my best friend and I don't know what to do.",
+        "I'm failing my statistics class and I don't know if I can recover.",
+        "Every day just feels the same. I'm bored and uninspired.",
+        "I'm having a hard time balancing school and my part-time job.",
+        "I feel so guilty for not spending enough time with my family.",
+        "I'm so worried about what my future holds after graduation.",
+        "I'm tired of being in an unhealthy relationship.",
+        "I can't stop comparing myself to others on social media.",
+        "I feel like no one understands what I'm going through.",
+        "My mind is racing, and I can't fall asleep at night.",
+        "I'm starting to resent my major and I don't know if I can switch.",
+        "I'm struggling with my body image and it's affecting my self-esteem.",
+        "I feel so overwhelmed by my academic workload that I just want to give up.",
+        "I'm feeling really discouraged after getting a bad grade on my midterm.",
+    ]
+
+    high_inputs = [
+        "I'm so overwhelmed I don't see the point in trying anymore.",
+        "I've been feeling hopeless and can't see a way out of this.",
+        "I'm not sure if I can handle this much longer.",
+        "I feel like a burden to everyone around me.",
+        "I'm not eating or sleeping well and I just don't have the energy to do anything.",
+        "I keep having these really negative thoughts about myself.",
+        "I feel so trapped, like there's no way out.",
+        "I don't know who to talk to about how bad I feel.",
+        "It's like I'm invisible, and nobody cares if I'm here or not.",
+        "I'm so exhausted from pretending to be okay.",
+        "I feel completely numb, and nothing brings me joy anymore.",
+        "I don't think I can make it through the rest of the semester.",
+        "My life feels out of control, and I can't seem to find my footing.",
+        "I'm so tired of fighting. I just want to give up.",
+        "I feel like I'm a complete failure and everyone knows it.",
+        "I've been isolating myself and avoiding my friends.",
+        "I'm starting to think my life has no purpose.",
+        "I'm not sure why I'm even here anymore.",
+        "I'm having panic attacks almost every day.",
+        "I can't seem to get over this sense of dread.",
+        "I feel like I'm a disappointment to my family and myself.",
+        "I'm considering taking a leave of absence because I can't function.",
+        "I'm just so angry all the time and I don't know why.",
+        "I feel so empty inside, like a shell of a person.",
+        "I'm having trouble getting out of bed in the morning.",
+        "My thoughts are getting darker and it's scaring me.",
+        "I don't want to live anymore.",
+        "I am going to end it all tonight.",
+        "I feel like hurting myself.",
+        "I have a plan to hurt myself.",
+        "The pain is too much. I can't take it anymore.",
+        "I'm thinking about hurting others.",
+        "I'm going to drop out and disappear.",
+        "I have a bottle of pills and I don't see another way out.",
+        "I feel like I need to punish myself for my mistakes.",
+        "I can't take this pain anymore. I want it to stop.",
+        "I'm going to kill myself.",
+        "I'm going to run away and never come back.",
+        "I'm so angry at this person I want to hurt them.",
+        "I have a weapon and I'm going to use it.",
+        "I am a danger to myself and others.",
+    ]
+
+    negativity_levels = {
+        "Low": low_inputs,
+        "Medium": medium_inputs,
+        "High": high_inputs,
+    }
+
+    samples = []
+    # Generate 200 samples
+    for _ in range(num_samples):
+        # Randomly select a negativity level
+        level = random.choice(list(negativity_levels.keys()))
+        inputs = negativity_levels[level]
+        
+        # Select a random input from the chosen level
+        user_input = random.choice(inputs)
+        
+        sample = {
+            "user_input": user_input,
+            "negativity_level": level,
+        }
+        samples.append(sample)
+
+    return samples
+
+if __name__ == "__main__":
+    generated_samples = generate_emotional_samples()
+    output_filename = "emotional_training_data.json"
+    
+    with open(output_filename, "w", encoding="utf-8") as f:
+        json.dump(generated_samples, f, indent=4)
+        
+    print(f"Successfully generated {len(generated_samples)} samples and saved them to {output_filename}.")
