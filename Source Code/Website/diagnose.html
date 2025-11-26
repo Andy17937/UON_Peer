@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统诊断工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .btn {
+            padding: 12px 24px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            font-size: 13px;
+            line-height: 1.8;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #10b981; font-weight: bold; }
+        .error { color: #ef4444; font-weight: bold; }
+        .warning { color: #f59e0b; font-weight: bold; }
+        .info { color: #3b82f6; font-weight: bold; }
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .fix-btn {
+            background: #10b981;
+        }
+        .fix-btn:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 ASK Uon 系统诊断工具</h1>
+        
+        <div class="section">
+            <h2>📋 基础检查</h2>
+            <button class="btn" onclick="checkBasics()">运行基础检查</button>
+            <button class="btn" onclick="checkFiles()">检查文件加载</button>
+            <button class="btn" onclick="checkStorage()">检查本地存储</button>
+            <div class="result" id="basic-result">点击按钮开始检查...</div>
+        </div>
+
+        <div class="section">
+            <h2>🎭 对话框测试</h2>
+            <button class="btn" onclick="testDialogs()">测试对话框显示</button>
+            <button class="btn" onclick="testCSS()">测试CSS加载</button>
+            <button class="btn" onclick="testJS()">测试JS功能</button>
+            <div class="result" id="dialog-result">点击按钮开始测试...</div>
+        </div>
+
+        <div class="section">
+            <h2>🔨 快速修复</h2>
+            <button class="btn fix-btn" onclick="clearCache()">清除浏览器缓存</button>
+            <button class="btn fix-btn" onclick="resetLocalStorage()">重置本地存储</button>
+            <button class="btn fix-btn" onclick="forceReload()">强制重新加载</button>
+            <div class="result" id="fix-result">点击按钮执行修复操作...</div>
+        </div>
+
+        <div class="section">
+            <h2>📊 系统信息</h2>
+            <button class="btn" onclick="showSystemInfo()">显示系统信息</button>
+            <div class="result" id="system-result">点击按钮查看系统信息...</div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString('zh-CN');
+            const icon = {
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️',
+                'info': 'ℹ️'
+            }[type] || 'ℹ️';
+            
+            const line = `<span class="${type}">${icon} [${timestamp}] ${message}</span><br>`;
+            element.innerHTML += line;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function clearResult(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function checkBasics() {
+            clearResult('basic-result');
+            log('basic-result', '开始基础检查...', 'info');
+            
+            // 检查浏览器
+            log('basic-result', `浏览器: ${navigator.userAgent}`, 'info');
+            log('basic-result', `语言: ${navigator.language}`, 'info');
+            log('basic-result', `在线状态: ${navigator.onLine ? '在线' : '离线'}`, navigator.onLine ? 'success' : 'error');
+            
+            // 检查Cookie
+            const cookieEnabled = navigator.cookieEnabled;
+            log('basic-result', `Cookie: ${cookieEnabled ? '启用' : '禁用'}`, cookieEnabled ? 'success' : 'error');
+            
+            // 检查LocalStorage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                log('basic-result', 'LocalStorage: 可用', 'success');
+            } catch (e) {
+                log('basic-result', `LocalStorage: 不可用 (${e.message})`, 'error');
+            }
+            
+            // 检查页面元素
+            const elements = [
+                { id: 'student-id-modal', name: '学生ID对话框' },
+                { id: 'psychology-modal', name: '心理健康对话框' },
+                { id: 'question-form', name: '问题表单' },
+                { id: 'chat-history', name: '聊天历史' }
+            ];
+            
+            elements.forEach(elem => {
+                const el = document.getElementById(elem.id);
+                if (el) {
+                    log('basic-result', `${elem.name}: 存在`, 'success');
+                } else {
+                    log('basic-result', `${elem.name}: 不存在`, 'error');
+                }
+            });
+            
+            log('basic-result', '基础检查完成', 'success');
+        }
+
+        async function checkFiles() {
+            clearResult('basic-result');
+            log('basic-result', '检查文件加载...', 'info');
+            
+            // 检查CSS
+            const stylesheets = document.querySelectorAll('link[rel="stylesheet"]');
+            log('basic-result', `找到 ${stylesheets.length} 个CSS文件`, 'info');
+            
+            for (let i = 0; i < stylesheets.length; i++) {
+                const link = stylesheets[i];
+                try {
+                    const response = await fetch(link.href, { method: 'HEAD' });
+                    if (response.ok) {
+                        log('basic-result', `CSS ${i+1}: ${link.href} - 加载成功`, 'success');
+                    } else {
+                        log('basic-result', `CSS ${i+1}: ${link.href} - 加载失败 (${response.status})`, 'error');
+                    }
+                } catch (e) {
+                    log('basic-result', `CSS ${i+1}: ${link.href} - 加载错误 (${e.message})`, 'error');
+                }
+            }
+            
+            // 检查JS
+            const scripts = document.querySelectorAll('script[src]');
+            log('basic-result', `找到 ${scripts.length} 个JS文件`, 'info');
+            
+            for (let i = 0; i < scripts.length; i++) {
+                const script = scripts[i];
+                if (script.src) {
+                    try {
+                        const response = await fetch(script.src, { method: 'HEAD' });
+                        if (response.ok) {
+                            log('basic-result', `JS ${i+1}: ${script.src} - 加载成功`, 'success');
+                        } else {
+                            log('basic-result', `JS ${i+1}: ${script.src} - 加载失败 (${response.status})`, 'error');
+                        }
+                    } catch (e) {
+                        log('basic-result', `JS ${i+1}: ${script.src} - 加载错误 (${e.message})`, 'error');
+                    }
+                }
+            }
+            
+            log('basic-result', '文件检查完成', 'success');
+        }
+
+        function checkStorage() {
+            clearResult('basic-result');
+            log('basic-result', '检查本地存储...', 'info');
+            
+            try {
+                const keys = Object.keys(localStorage);
+                log('basic-result', `LocalStorage 中有 ${keys.length} 个项目`, 'info');
+                
+                keys.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    const size = new Blob([value]).size;
+                    log('basic-result', `${key}: ${size} bytes`, 'info');
+                    
+                    if (key === 'qa-app-state') {
+                        try {
+                            const data = JSON.parse(value);
+                            log('basic-result', `  - 语言: ${data.language || 'N/A'}`, 'info');
+                            log('basic-result', `  - 学生ID: ${data.studentId || 'N/A'}`, 'info');
+                            log('basic-result', `  - 已验证: ${data.isStudentVerified ? '是' : '否'}`, data.isStudentVerified ? 'success' : 'warning');
+                            log('basic-result', `  - 问题数: ${data.questionCount || 0}`, 'info');
+                        } catch (e) {
+                            log('basic-result', `  - 解析错误: ${e.message}`, 'error');
+                        }
+                    }
+                });
+                
+                log('basic-result', '存储检查完成', 'success');
+            } catch (e) {
+                log('basic-result', `检查存储时出错: ${e.message}`, 'error');
+            }
+        }
+
+        function testDialogs() {
+            clearResult('dialog-result');
+            log('dialog-result', '开始对话框测试...', 'info');
+            
+            // 检查对话框元素
+            const studentModal = document.getElementById('student-id-modal');
+            const psychModal = document.getElementById('psychology-modal');
+            
+            if (!studentModal) {
+                log('dialog-result', '学生ID对话框元素不存在！', 'error');
+            } else {
+                log('dialog-result', '学生ID对话框元素存在', 'success');
+                
+                // 检查CSS类
+                log('dialog-result', `当前类: ${studentModal.className}`, 'info');
+                
+                // 检查计算样式
+                const style = window.getComputedStyle(studentModal);
+                log('dialog-result', `display: ${style.display}`, 'info');
+                log('dialog-result', `z-index: ${style.zIndex}`, 'info');
+                log('dialog-result', `position: ${style.position}`, 'info');
+                
+                // 尝试显示
+                log('dialog-result', '尝试添加 active 类...', 'info');
+                studentModal.classList.add('active');
+                
+                setTimeout(() => {
+                    const newStyle = window.getComputedStyle(studentModal);
+                    log('dialog-result', `添加后 display: ${newStyle.display}`, newStyle.display === 'flex' ? 'success' : 'error');
+                    
+                    if (newStyle.display === 'flex') {
+                        log('dialog-result', '✅ 对话框显示成功！', 'success');
+                        setTimeout(() => {
+                            studentModal.classList.remove('active');
+                            log('dialog-result', '对话框已关闭', 'info');
+                        }, 3000);
+                    } else {
+                        log('dialog-result', '❌ 对话框无法显示！可能是CSS问题', 'error');
+                    }
+                }, 100);
+            }
+            
+            if (!psychModal) {
+                log('dialog-result', '心理健康对话框元素不存在！', 'error');
+            } else {
+                log('dialog-result', '心理健康对话框元素存在', 'success');
+            }
+        }
+
+        function testCSS() {
+            clearResult('dialog-result');
+            log('dialog-result', '测试CSS样式...', 'info');
+            
+            // 创建测试元素
+            const testDiv = document.createElement('div');
+            testDiv.className = 'modal-overlay';
+            testDiv.style.position = 'absolute';
+            testDiv.style.left = '-9999px';
+            document.body.appendChild(testDiv);
+            
+            const style = window.getComputedStyle(testDiv);
+            log('dialog-result', `modal-overlay display: ${style.display}`, 'info');
+            log('dialog-result', `modal-overlay z-index: ${style.zIndex}`, 'info');
+            
+            // 添加active类测试
+            testDiv.classList.add('active');
+            const activeStyle = window.getComputedStyle(testDiv);
+            log('dialog-result', `modal-overlay.active display: ${activeStyle.display}`, activeStyle.display === 'flex' ? 'success' : 'error');
+            
+            document.body.removeChild(testDiv);
+            
+            // 检查CSS变量
+            const root = document.documentElement;
+            const rootStyle = window.getComputedStyle(root);
+            log('dialog-result', `--primary-gradient: ${rootStyle.getPropertyValue('--primary-gradient') || '未定义'}`, 'info');
+            
+            log('dialog-result', 'CSS测试完成', 'success');
+        }
+
+        function testJS() {
+            clearResult('dialog-result');
+            log('dialog-result', '测试JavaScript功能...', 'info');
+            
+            // 检查全局对象
+            if (typeof window.qaApp !== 'undefined') {
+                log('dialog-result', 'qaApp 对象存在', 'success');
+                log('dialog-result', `  - state: ${window.qaApp.state ? '存在' : '不存在'}`, 'info');
+                log('dialog-result', `  - ui: ${window.qaApp.ui ? '存在' : '不存在'}`, 'info');
+                log('dialog-result', `  - api: ${window.qaApp.api ? '存在' : '不存在'}`, 'info');
+                
+                if (window.qaApp.state) {
+                    log('dialog-result', `  - 当前语言: ${window.qaApp.state.currentLanguage}`, 'info');
+                    log('dialog-result', `  - 学生ID: ${window.qaApp.state.studentId || 'N/A'}`, 'info');
+                    log('dialog-result', `  - 已验证: ${window.qaApp.state.isStudentVerified}`, 'info');
+                }
+            } else {
+                log('dialog-result', 'qaApp 对象不存在！JavaScript可能未加载', 'error');
+            }
+            
+            // 检查jQuery（如果使用）
+            log('dialog-result', `jQuery: ${typeof $ !== 'undefined' ? '已加载' : '未加载'}`, 'info');
+            
+            log('dialog-result', 'JavaScript测试完成', 'success');
+        }
+
+        function clearCache() {
+            clearResult('fix-result');
+            log('fix-result', '清除浏览器缓存...', 'info');
+            
+            // 清除Service Worker缓存
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                        log('fix-result', 'Service Worker已卸载', 'success');
+                    }
+                });
+            }
+            
+            // 清除Cache API
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                        log('fix-result', `缓存 ${name} 已清除`, 'success');
+                    });
+                });
+            }
+            
+            log('fix-result', '缓存清除完成，请按 Ctrl+F5 强制刷新页面', 'success');
+        }
+
+        function resetLocalStorage() {
+            clearResult('fix-result');
+            log('fix-result', '重置本地存储...', 'info');
+            
+            const keys = Object.keys(localStorage);
+            log('fix-result', `发现 ${keys.length} 个存储项目`, 'info');
+            
+            keys.forEach(key => {
+                localStorage.removeItem(key);
+                log('fix-result', `已删除: ${key}`, 'success');
+            });
+            
+            log('fix-result', '本地存储已重置，请刷新页面', 'success');
+        }
+
+        function forceReload() {
+            clearResult('fix-result');
+            log('fix-result', '准备强制重新加载...', 'info');
+            log('fix-result', '3秒后将重新加载页面...', 'warning');
+            
+            setTimeout(() => {
+                window.location.href = '/index.html?_t=' + Date.now();
+            }, 3000);
+        }
+
+        function showSystemInfo() {
+            clearResult('system-result');
+            log('system-result', '系统信息:', 'info');
+            
+            const info = {
+                '浏览器': navigator.userAgent,
+                '平台': navigator.platform,
+                '语言': navigator.language,
+                '在线': navigator.onLine,
+                'Cookie': navigator.cookieEnabled,
+                '屏幕': `${screen.width}x${screen.height}`,
+                '视口': `${window.innerWidth}x${window.innerHeight}`,
+                '时区': Intl.DateTimeFormat().resolvedOptions().timeZone,
+                '内存': navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'N/A',
+                'CPU核心': navigator.hardwareConcurrency || 'N/A',
+                '连接类型': navigator.connection ? navigator.connection.effectiveType : 'N/A'
+            };
+            
+            for (const [key, value] of Object.entries(info)) {
+                log('system-result', `${key}: ${value}`, 'info');
+            }
+            
+            // 显示性能信息
+            if (performance.timing) {
+                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                log('system-result', `页面加载时间: ${loadTime}ms`, 'info');
+            }
+            
+            log('system-result', '系统信息显示完成', 'success');
+        }
+
+        // 页面加载时自动运行
+        window.addEventListener('load', function() {
+            console.log('诊断工具已加载');
+        });
+    </script>
+</body>
+</html>
+
