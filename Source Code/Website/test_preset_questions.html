@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Preset Questions</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .active { color: green; }
+        .inactive { color: red; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>测试 Preset Questions API</h1>
+    
+    <button onclick="testAPI()">🔄 测试 API</button>
+    <button onclick="clearCache()">🗑️ 清除缓存</button>
+    
+    <h2>结果:</h2>
+    <div id="result"></div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>正在加载...</p>';
+            
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`/api/questions.php?action=preset_questions&t=${timestamp}`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    let html = `<h3>✅ 成功获取 ${data.data.length} 个分类</h3>`;
+                    
+                    data.data.forEach((item, idx) => {
+                        const activeClass = item.is_active ? 'active' : 'inactive';
+                        const activeText = item.is_active ? '✓ Active' : '✗ Inactive';
+                        
+                        html += `
+                            <div class="result">
+                                <h4>${idx + 1}. ${item.category_name_zh} (${item.category})</h4>
+                                <p><strong>状态:</strong> <span class="${activeClass}">${activeText}</span></p>
+                                <p><strong>图标:</strong> ${item.category_icon}</p>
+                                <p><strong>排序:</strong> ${item.sort_order}</p>
+                                <p><strong>中文问题 (${item.questions_zh ? item.questions_zh.length : 0}):</strong></p>
+                                <ul>
+                                    ${item.questions_zh ? item.questions_zh.map(q => `<li>${q}</li>`).join('') : '<li>无</li>'}
+                                </ul>
+                                <p><strong>英文问题 (${item.questions_en ? item.questions_en.length : 0}):</strong></p>
+                                <ul>
+                                    ${item.questions_en ? item.questions_en.map(q => `<li>${q}</li>`).join('') : '<li>无</li>'}
+                                </ul>
+                            </div>
+                        `;
+                    });
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<p style="color:red;">❌ 失败: ${data.error || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color:red;">❌ 错误: ${error.message}</p>`;
+            }
+        }
+        
+        function clearCache() {
+            // 清除浏览器缓存
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+            
+            // 清除 localStorage
+            localStorage.clear();
+            
+            // 清除 sessionStorage
+            sessionStorage.clear();
+            
+            alert('✅ 缓存已清除！请刷新页面。');
+        }
+        
+        // 页面加载时自动测试
+        window.onload = testAPI;
+    </script>
+</body>
+</html>
+

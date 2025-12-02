@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>对话框测试</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        .test-btn:hover {
+            background: #764ba2;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-controls">
+        <h2>🔍 对话框测试工具</h2>
+        <p>点击按钮测试对话框功能：</p>
+        
+        <button class="test-btn" onclick="testStudentDialog()">测试学生ID对话框</button>
+        <button class="test-btn" onclick="testPsychologyDialog()">测试心理健康对话框</button>
+        <button class="test-btn" onclick="checkElements()">检查元素是否存在</button>
+        <button class="test-btn" onclick="checkStyles()">检查样式加载</button>
+        
+        <div class="status" id="status">等待测试...</div>
+    </div>
+
+    <!-- 学生ID对话框 -->
+    <div class="modal-overlay student-id-modal" id="student-id-modal">
+        <div class="student-id-dialog">
+            <div class="dialog-header">
+                <div class="dialog-avatar">
+                    <img src="https://www.newcastle.edu.au/__data/assets/file/0011/661727/uon-logo-square.svg" alt="UON" class="avatar-img">
+                </div>
+                <h3>欢迎使用ASK Uon</h3>
+                <p>让我们开始吧</p>
+            </div>
+            
+            <div class="dialog-body">
+                <div class="bot-message">
+                    <div class="bot-avatar">🤖</div>
+                    <div class="message-bubble">
+                        <p>你好！我是你的校园助手。测试对话框显示。</p>
+                    </div>
+                </div>
+                
+                <div class="dialog-actions">
+                    <button class="dialog-btn secondary" onclick="closeDialog()">关闭</button>
+                    <button class="dialog-btn primary" onclick="alert('测试成功！')">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 心理健康对话框 -->
+    <div class="modal-overlay" id="psychology-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>心理健康支持</h3>
+                <button class="modal-close" onclick="closeDialog()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="support-icon">💚</div>
+                <p>测试心理健康对话框</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeDialog()">我知道了</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const status = document.getElementById('status');
+            status.innerHTML += '<br>' + message;
+            console.log(message);
+        }
+
+        function testStudentDialog() {
+            log('🔄 尝试打开学生ID对话框...');
+            const modal = document.getElementById('student-id-modal');
+            if (modal) {
+                log('✅ 找到学生ID对话框元素');
+                modal.classList.add('active');
+                log('✅ 已添加 active 类');
+                
+                // 检查样式
+                const computedStyle = window.getComputedStyle(modal);
+                log('📊 display 样式: ' + computedStyle.display);
+                log('📊 z-index: ' + computedStyle.zIndex);
+            } else {
+                log('❌ 未找到学生ID对话框元素！');
+            }
+        }
+
+        function testPsychologyDialog() {
+            log('🔄 尝试打开心理健康对话框...');
+            const modal = document.getElementById('psychology-modal');
+            if (modal) {
+                log('✅ 找到心理健康对话框元素');
+                modal.classList.add('active');
+                log('✅ 已添加 active 类');
+                
+                const computedStyle = window.getComputedStyle(modal);
+                log('📊 display 样式: ' + computedStyle.display);
+            } else {
+                log('❌ 未找到心理健康对话框元素！');
+            }
+        }
+
+        function closeDialog() {
+            log('🔄 关闭所有对话框...');
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.classList.remove('active');
+            });
+            log('✅ 对话框已关闭');
+        }
+
+        function checkElements() {
+            log('🔍 检查页面元素...');
+            
+            const studentModal = document.getElementById('student-id-modal');
+            const psychModal = document.getElementById('psychology-modal');
+            
+            log('学生ID对话框: ' + (studentModal ? '✅ 存在' : '❌ 不存在'));
+            log('心理健康对话框: ' + (psychModal ? '✅ 存在' : '❌ 不存在'));
+            
+            if (studentModal) {
+                log('学生ID对话框 classes: ' + studentModal.className);
+            }
+            if (psychModal) {
+                log('心理健康对话框 classes: ' + psychModal.className);
+            }
+        }
+
+        function checkStyles() {
+            log('🎨 检查CSS样式加载...');
+            
+            const links = document.querySelectorAll('link[rel="stylesheet"]');
+            log('找到 ' + links.length + ' 个CSS文件');
+            
+            links.forEach((link, index) => {
+                log(`CSS ${index + 1}: ${link.href}`);
+            });
+            
+            // 检查关键样式是否存在
+            const testDiv = document.createElement('div');
+            testDiv.className = 'modal-overlay';
+            testDiv.style.position = 'absolute';
+            testDiv.style.left = '-9999px';
+            document.body.appendChild(testDiv);
+            
+            const computedStyle = window.getComputedStyle(testDiv);
+            log('modal-overlay display: ' + computedStyle.display);
+            log('modal-overlay z-index: ' + computedStyle.zIndex);
+            
+            document.body.removeChild(testDiv);
+        }
+
+        // 页面加载时自动检查
+        window.addEventListener('load', function() {
+            log('✅ 页面已加载');
+            checkElements();
+        });
+    </script>
+</body>
+</html>
+

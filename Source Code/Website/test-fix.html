@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复测试 - 学生问答系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .response-text {
+            white-space: pre-wrap;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>修复测试页面</h1>
+    <p>测试AI转交按钮显示和系统设置参数是否生效</p>
+
+    <div class="test-section">
+        <h2>1. 心理健康问题测试</h2>
+        <p>测试心理健康相关问题是否显示AI转交按钮，以及是否使用系统设置的热线电话</p>
+        <button class="test-button" onclick="testPsychology()">测试心理健康问题</button>
+        <div id="psychology-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 普通问题测试</h2>
+        <p>测试普通问题是否使用系统设置的联系方式</p>
+        <button class="test-button" onclick="testGeneral()">测试普通问题</button>
+        <div id="general-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. AI模式测试</h2>
+        <p>测试AI回复是否显示链接按钮</p>
+        <button class="test-button" onclick="testAIMode()">测试AI模式</button>
+        <div id="ai-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. 系统设置查看</h2>
+        <p>查看当前系统设置</p>
+        <button class="test-button" onclick="viewSettings()">查看系统设置</button>
+        <div id="settings-result"></div>
+    </div>
+
+    <script>
+        async function testPsychology() {
+            const resultDiv = document.getElementById('psychology-result');
+            resultDiv.innerHTML = '<p>测试中...</p>';
+            
+            try {
+                const response = await fetch('./api/questions.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: 'I feel bad and depressed',
+                        language: 'zh'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h4>测试成功</h4>
+                            <p><strong>分类：</strong> ${data.category}</p>
+                            <p><strong>心理健康相关：</strong> ${data.is_psychology_related ? '是' : '否'}</p>
+                            <div class="response-text">${data.response}</div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || '请求失败');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>测试失败</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testGeneral() {
+            const resultDiv = document.getElementById('general-result');
+            resultDiv.innerHTML = '<p>测试中...</p>';
+            
+            try {
+                const response = await fetch('./api/questions.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: '这是一个未知的问题，应该返回默认回复',
+                        language: 'zh'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h4>测试成功</h4>
+                            <p><strong>分类：</strong> ${data.category}</p>
+                            <p><strong>心理健康相关：</strong> ${data.is_psychology_related ? '是' : '否'}</p>
+                            <div class="response-text">${data.response}</div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || '请求失败');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>测试失败</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testAIMode() {
+            const resultDiv = document.getElementById('ai-result');
+            resultDiv.innerHTML = '<p>测试中...</p>';
+            
+            try {
+                const response = await fetch('./api/questions.php?action=ai_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: '请介绍一下图书馆的开放时间',
+                        category: 'general',
+                        language: 'zh'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h4>测试成功</h4>
+                            <p><strong>分类：</strong> ${data.category}</p>
+                            <p><strong>AI回复：</strong> ${data.is_ai_response ? '是' : '否'}</p>
+                            <p><strong>链接数量：</strong> ${data.links ? data.links.length : 0}</p>
+                            <div class="response-text">${data.response}</div>
+                            ${data.links && data.links.length > 0 ? `
+                                <h5>生成的链接：</h5>
+                                <ul>
+                                    ${data.links.map(link => `<li><a href="${link.url}" target="_blank">${link.title}</a></li>`).join('')}
+                                </ul>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || '请求失败');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>测试失败</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function viewSettings() {
+            const resultDiv = document.getElementById('settings-result');
+            resultDiv.innerHTML = '<p>加载中...</p>';
+            
+            try {
+                const response = await fetch('./api/admin-config.php?action=get_settings&category=all', {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const settings = data.settings;
+                    const contactSettings = settings.filter(s => s.category === 'contact' || s.category === 'psychology');
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h4>系统设置</h4>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr style="background: #f0f0f0;">
+                                    <th style="border: 1px solid #ddd; padding: 8px;">设置键</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">设置值</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">描述</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">分类</th>
+                                </tr>
+                                ${contactSettings.map(setting => `
+                                    <tr>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${setting.setting_key}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${setting.setting_value}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${setting.description}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${setting.category}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || '请求失败');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h4>加载失败</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 

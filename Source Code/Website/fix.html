@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一键修复 - ASK Uon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .problem-list {
+            text-align: left;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .problem-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        .problem-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #ef4444;
+        }
+        .problem-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        .fix-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        .fix-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(16,185,129,0.4);
+        }
+        .fix-btn:active {
+            transform: translateY(0);
+        }
+        .manual-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .status {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.8;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        .status.active {
+            display: block;
+        }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .info {
+            color: #3b82f6;
+        }
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+        .progress.active {
+            display: block;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            transition: width 0.3s;
+            width: 0%;
+        }
+        .countdown {
+            font-size: 2rem;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+            display: none;
+        }
+        .countdown.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://www.newcastle.edu.au/__data/assets/file/0011/661727/uon-logo-square.svg" alt="UON Logo" class="logo">
+        
+        <h1>🔧 一键修复工具</h1>
+        <p class="subtitle">解决对话框无法弹出的问题</p>
+        
+        <div class="problem-list">
+            <h3>检测到的问题：</h3>
+            <div class="problem-item">
+                <span class="problem-icon">❌</span>
+                <div>对话框无法显示</div>
+            </div>
+            <div class="problem-item">
+                <span class="problem-icon">❌</span>
+                <div>登录框无法弹出</div>
+            </div>
+            <div class="problem-item">
+                <span class="problem-icon">⚠️</span>
+                <div>可能的浏览器缓存问题</div>
+            </div>
+        </div>
+        
+        <button class="fix-btn" onclick="autoFix()">
+            🚀 自动修复（推荐）
+        </button>
+        
+        <button class="fix-btn manual-btn" onclick="manualFix()">
+            🔍 查看详细诊断
+        </button>
+        
+        <div class="progress" id="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        
+        <div class="countdown" id="countdown"></div>
+        
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.classList.add('active');
+            
+            const timestamp = new Date().toLocaleTimeString('zh-CN');
+            const icon = {
+                'success': '✅',
+                'error': '❌',
+                'info': 'ℹ️'
+            }[type] || 'ℹ️';
+            
+            const line = `<span class="${type}">${icon} [${timestamp}] ${message}</span><br>`;
+            status.innerHTML += line;
+            status.scrollTop = status.scrollHeight;
+        }
+
+        function updateProgress(percent) {
+            const progress = document.getElementById('progress');
+            const bar = document.getElementById('progress-bar');
+            progress.classList.add('active');
+            bar.style.width = percent + '%';
+        }
+
+        function showCountdown(seconds) {
+            const countdown = document.getElementById('countdown');
+            countdown.classList.add('active');
+            countdown.textContent = seconds;
+            
+            if (seconds > 0) {
+                setTimeout(() => showCountdown(seconds - 1), 1000);
+            } else {
+                countdown.textContent = '正在跳转...';
+            }
+        }
+
+        async function autoFix() {
+            document.getElementById('status').innerHTML = '';
+            log('🚀 开始自动修复...', 'info');
+            updateProgress(10);
+            
+            // Step 1: 清除本地存储
+            log('步骤 1/5: 清除本地存储...', 'info');
+            try {
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => localStorage.removeItem(key));
+                log(`✅ 已清除 ${keys.length} 个本地存储项目`, 'success');
+            } catch (e) {
+                log(`⚠️ 清除本地存储时出错: ${e.message}`, 'error');
+            }
+            updateProgress(30);
+            
+            await sleep(500);
+            
+            // Step 2: 清除SessionStorage
+            log('步骤 2/5: 清除会话存储...', 'info');
+            try {
+                sessionStorage.clear();
+                log('✅ 会话存储已清除', 'success');
+            } catch (e) {
+                log(`⚠️ 清除会话存储时出错: ${e.message}`, 'error');
+            }
+            updateProgress(50);
+            
+            await sleep(500);
+            
+            // Step 3: 清除Service Worker
+            log('步骤 3/5: 清除Service Worker...', 'info');
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                    log(`✅ 已卸载 ${registrations.length} 个Service Worker`, 'success');
+                } catch (e) {
+                    log('⚠️ 没有Service Worker需要清除', 'info');
+                }
+            }
+            updateProgress(70);
+            
+            await sleep(500);
+            
+            // Step 4: 清除Cache API
+            log('步骤 4/5: 清除缓存...', 'info');
+            if ('caches' in window) {
+                try {
+                    const names = await caches.keys();
+                    for (let name of names) {
+                        await caches.delete(name);
+                    }
+                    log(`✅ 已清除 ${names.length} 个缓存`, 'success');
+                } catch (e) {
+                    log('⚠️ 没有缓存需要清除', 'info');
+                }
+            }
+            updateProgress(90);
+            
+            await sleep(500);
+            
+            // Step 5: 完成
+            log('步骤 5/5: 准备重新加载...', 'info');
+            updateProgress(100);
+            
+            log('✅ 修复完成！', 'success');
+            log('', 'info');
+            log('🔄 3秒后将自动跳转到主页...', 'info');
+            log('', 'info');
+            log('💡 提示：如果问题仍然存在，请尝试：', 'info');
+            log('   1. 按 Ctrl+Shift+Delete 清除浏览器数据', 'info');
+            log('   2. 或者使用无痕/隐私模式打开', 'info');
+            
+            showCountdown(3);
+            
+            setTimeout(() => {
+                window.location.href = '/index.html?_t=' + Date.now();
+            }, 3000);
+        }
+
+        function manualFix() {
+            window.location.href = '/diagnose.html';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // 检测问题
+        window.addEventListener('load', function() {
+            console.log('修复工具已加载');
+            
+            // 检查是否有存储的数据
+            const storageItems = Object.keys(localStorage).length;
+            if (storageItems > 0) {
+                console.log(`发现 ${storageItems} 个本地存储项目`);
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关键词检测测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-question {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .test-result {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .failed { background-color: #f8d7da; color: #721c24; }
+        .keywords { color: #007bff; font-weight: bold; }
+        .category { color: #28a745; font-weight: bold; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .log-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>关键词检测功能测试</h1>
+        
+        <button onclick="runAllTests()">运行所有测试</button>
+        <button onclick="clearResults()">清空结果</button>
+        
+        <div id="testResults"></div>
+        
+        <div class="log-section">
+            <h3>详细日志</h3>
+            <div id="testLog"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'api/questions.php';
+        
+        // 测试用例
+        const testCases = [
+            // 宿舍相关
+            { question: "宿舍几点熄灯？", expectedCategory: "dormitory", description: "宿舍关键词测试" },
+            { question: "寝室门禁时间", expectedCategory: "dormitory", description: "寝室、门禁关键词测试" },
+            { question: "What time is lights out in dormitory?", expectedCategory: "dormitory", description: "英文宿舍关键词测试" },
+            
+            // 课程相关
+            { question: "我想查看课程表", expectedCategory: "courses", description: "课程、课表关键词测试" },
+            { question: "今天有什么课？", expectedCategory: "courses", description: "课程相关测试" },
+            { question: "class schedule for today", expectedCategory: "courses", description: "英文课程关键词测试" },
+            
+            // 成绩相关
+            { question: "怎么查成绩？", expectedCategory: "grades", description: "成绩查询测试" },
+            { question: "考试分数什么时候出来", expectedCategory: "grades", description: "考试、分数关键词测试" },
+            { question: "check my exam results", expectedCategory: "grades", description: "英文成绩关键词测试" },
+            
+            // 食堂相关
+            { question: "食堂什么时候开门？", expectedCategory: "cafeteria", description: "食堂时间测试" },
+            { question: "餐厅今天有什么菜", expectedCategory: "cafeteria", description: "餐厅、菜品关键词测试" },
+            { question: "dining hall hours", expectedCategory: "cafeteria", description: "英文食堂关键词测试" },
+            
+            // 图书馆相关
+            { question: "图书馆开放时间", expectedCategory: "library", description: "图书馆时间测试" },
+            { question: "我想借书", expectedCategory: "library", description: "借书关键词测试" },
+            { question: "library study room", expectedCategory: "library", description: "英文图书馆关键词测试" },
+            
+            // 心理健康相关
+            { question: "我最近压力很大", expectedCategory: "counseling", description: "心理压力测试" },
+            { question: "感觉很焦虑怎么办", expectedCategory: "counseling", description: "焦虑关键词测试" },
+            { question: "I feel depressed", expectedCategory: "counseling", description: "英文心理健康测试" },
+            
+            // 复合关键词测试
+            { question: "宿舍熄灯时间和图书馆开放时间", expectedCategory: "dormitory", description: "多关键词测试（应该匹配权重高的）" },
+            { question: "我想查成绩，但是心情不好", expectedCategory: "counseling", description: "混合关键词测试（心理健康优先级高）" }
+        ];
+        
+        async function testKeywordDetection(testCase) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: testCase.question
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                return {
+                    success: true,
+                    data: data,
+                    matched: data.category === testCase.expectedCategory
+                };
+                
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+        
+        async function runAllTests() {
+            const resultsDiv = document.getElementById('testResults');
+            const logDiv = document.getElementById('testLog');
+            
+            resultsDiv.innerHTML = '<h2>测试结果</h2>';
+            logDiv.innerHTML = '';
+            
+            let passed = 0;
+            let failed = 0;
+            
+            for (let i = 0; i < testCases.length; i++) {
+                const testCase = testCases[i];
+                logDiv.innerHTML += `<div>测试 ${i + 1}: ${testCase.description}</div>`;
+                
+                const result = await testKeywordDetection(testCase);
+                
+                const testDiv = document.createElement('div');
+                testDiv.className = 'test-section';
+                
+                if (result.success) {
+                    const isMatch = result.matched;
+                    const resultClass = isMatch ? 'success' : 'failed';
+                    
+                    if (isMatch) passed++;
+                    else failed++;
+                    
+                    testDiv.innerHTML = `
+                        <div class="test-question">${testCase.description}</div>
+                        <div><strong>问题：</strong>${testCase.question}</div>
+                        <div><strong>期望分类：</strong><span class="category">${testCase.expectedCategory}</span></div>
+                        <div class="test-result ${resultClass}">
+                            <div><strong>实际分类：</strong><span class="category">${result.data.category}</span></div>
+                            <div><strong>匹配结果：</strong>${isMatch ? '✅ 成功' : '❌ 失败'}</div>
+                            <div><strong>回复：</strong>${result.data.response}</div>
+                            <div><strong>语言：</strong>${result.data.language}</div>
+                            <div><strong>心理健康相关：</strong>${result.data.is_psychology_related ? '是' : '否'}</div>
+                        </div>
+                    `;
+                } else {
+                    failed++;
+                    testDiv.innerHTML = `
+                        <div class="test-question">${testCase.description}</div>
+                        <div><strong>问题：</strong>${testCase.question}</div>
+                        <div class="test-result failed">
+                            <div><strong>错误：</strong>${result.error}</div>
+                        </div>
+                    `;
+                }
+                
+                resultsDiv.appendChild(testDiv);
+                
+                // 短暂延迟，避免请求过快
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            // 显示总结
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'test-section';
+            summaryDiv.innerHTML = `
+                <h3>测试总结</h3>
+                <div><strong>总计：</strong>${testCases.length} 个测试</div>
+                <div class="success"><strong>通过：</strong>${passed} 个</div>
+                <div class="failed"><strong>失败：</strong>${failed} 个</div>
+                <div><strong>成功率：</strong>${((passed / testCases.length) * 100).toFixed(1)}%</div>
+            `;
+            resultsDiv.insertBefore(summaryDiv, resultsDiv.firstChild.nextSibling);
+            
+            logDiv.innerHTML += `<div><strong>测试完成！通过率：${((passed / testCases.length) * 100).toFixed(1)}%</strong></div>`;
+        }
+        
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('testLog').innerHTML = '';
+        }
+        
+        // 页面加载完成后自动运行测试
+        window.addEventListener('load', function() {
+            console.log('关键词检测测试页面已加载');
+        });
+    </script>
+</body>
+</html> 
