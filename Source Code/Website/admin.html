@@ -1,0 +1,4041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | ASK Uon</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- UON Logo 图标 -->
+    <link rel="icon" type="image/svg+xml" href="https://www.newcastle.edu.au/__data/assets/file/0011/661727/uon-logo-square.svg">
+    <style>
+        /* Admin panel special styles */
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .admin-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .question-item {
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+        }
+        
+        .question-item.psychology {
+            border-left-color: #ff6b6b;
+            background: #fff5f5;
+        }
+        
+        .question-item.urgent {
+            border-left-color: #ff3333;
+            background: #ffebeb;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 51, 51, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); }
+        }
+        
+        .question-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .question-response {
+            color: #555;
+            font-style: italic;
+        }
+        
+        .alert-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online { background: #48bb78; }
+        .status-offline { background: #f56565; }
+        
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Preset Questions Management Styles */
+        .question-preview {
+            margin-top: 10px;
+        }
+        
+        .question-preview summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #667eea;
+            padding: 5px 0;
+        }
+        
+        .question-preview summary:hover {
+            color: #5a67d8;
+        }
+        
+        .preview-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .preview-section h5 {
+            margin: 0 0 10px 0;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+        
+        .preview-section ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .preview-section li {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        /* Status badges */
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .status-inactive {
+            background: #f56565;
+            color: white;
+        }
+
+        /* AI Configuration Styles */
+        .ai-config-section {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .config-item {
+            background: #f8f9ff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .config-item h4 {
+            margin: 0 0 15px 0;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+        
+        .config-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .ai-status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        
+        /* Configuration Management Styles */
+        .config-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: transparent;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .config-content {
+            display: none;
+        }
+        
+        .config-content.active {
+            display: block;
+        }
+        
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .config-header h3 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .add-btn {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .add-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+        
+        .config-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+        }
+        
+        .config-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .config-item-info {
+            flex: 1;
+        }
+        
+        .config-item-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .config-item-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .config-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .edit-btn, .delete-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-btn {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .edit-btn:hover {
+            background: #e0a800;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        
+        .config-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .config-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h4 {
+            margin: 0 0 20px 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .form-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        
+        /* Enhanced form styles for preset questions */
+        .form-section {
+            background: #f8f9ff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-section h5 {
+            margin: 0 0 15px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        
+        .required {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+        
+        .form-hint {
+            display: block;
+            font-size: 0.8rem;
+            color: #718096;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .checkmark {
+            margin-left: 5px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+        
+        .btn-secondary:hover {
+            background: #edf2f7;
+            transform: translateY(-1px);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #a0aec0;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: #fed7d7;
+            color: #e53e3e;
+        }
+        
+        /* Categories Grid Layout */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .category-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        
+        .category-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .category-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+        
+        .category-names {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .category-name-en {
+            font-size: 1rem;
+            color: #2d3748;
+        }
+        
+        .category-name-zh {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+        
+        .category-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+        
+        .category-meta span {
+            background: #edf2f7;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        
+        .category-questions {
+            margin-bottom: 15px;
+        }
+        
+        .category-questions h6 {
+            margin: 0 0 8px 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .questions-preview {
+            background: #f8f9ff;
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .question-item {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-bottom: 4px;
+            padding: 2px 0;
+        }
+        
+        .question-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .no-questions {
+            font-size: 0.8rem;
+            color: #a0aec0;
+            font-style: italic;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .category-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .category-actions .edit-btn,
+        .category-actions .delete-btn {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-description {
+            margin: 0 0 15px 0;
+            font-size: 0.9rem;
+            color: #718096;
+            line-height: 1.4;
+        }
+        
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-tag.active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-tag.inactive {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        @media (max-width: 768px) {
+            .categories-grid {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .category-card {
+                padding: 15px;
+            }
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        
+        .form-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .form-actions button[type="submit"] {
+            background: #667eea;
+            color: white;
+        }
+        
+        .form-actions button[type="submit"]:hover {
+            background: #5a67d8;
+        }
+        
+        .form-actions button[type="button"] {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .form-actions button[type="button"]:hover {
+            background: #5a6268;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .psychology-badge {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Data Cleanup Styles */
+        .cleanup-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .cleanup-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .cleanup-item h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .cleanup-item p {
+            margin: 0 0 15px 0;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .cleanup-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .cleanup-controls label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .cleanup-controls input {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 80px;
+        }
+
+        .cleanup-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-transform: none;
+        }
+
+        .cleanup-btn.danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .cleanup-btn.danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .cleanup-btn.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .cleanup-btn.warning:hover {
+            background: #e0a800;
+            transform: translateY(-1px);
+        }
+
+        .cleanup-btn.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .cleanup-btn.success:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .cleanup-status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .cleanup-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .cleanup-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .cleanup-status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            display: block;
+        }
+
+        .warning-message {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .warning-message p {
+            margin: 5px 0;
+        }
+
+        .warning-message strong {
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .cleanup-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cleanup-btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+        /* Login overlay/card animations */
+        @keyframes modal-pop {
+            0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .login-card-anim {
+            animation: modal-pop 320ms cubic-bezier(.2,.8,.2,1);
+        }
+
+        /* Exit animation for login card */
+        @keyframes modal-fade-out {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(10px) scale(0.98); }
+        }
+        .login-card-exit {
+            animation: modal-fade-out 220ms ease forwards;
+        }
+
+        /* Success toast */
+        .toast {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            z-index: 25000;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .toast.show { display: flex; animation: toast-in 240ms ease; }
+        @keyframes toast-in {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes toast-out {
+            0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+        }
+        .toast.hide { animation: toast-out 200ms ease forwards; }
+        
+        /* Link input styles */
+        #template-links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .link-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .link-input-row input {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .link-input-row input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .add-link-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .add-link-btn:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+        
+        .remove-link-btn:hover {
+            background: #dc2626 !important;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">← Back to Q&A System</a>
+    
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <h1>🛠️ Admin Panel</h1>
+                <p>Student Q&A System Data Monitoring & Analysis</p>
+            </div>
+            <div class="admin-status" style="display:flex;gap:10px;align-items:center;">
+                <span class="status-indicator status-online" id="system-status"></span>
+                <span id="status-text">System Online</span>
+                <button id="admin-logout" class="control-btn" style="background:#dc3545;display:none;">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-questions">0</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="today-questions">0</div>
+                <div class="stat-label">Today's Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="psychology-questions">0</div>
+                <div class="stat-label">Mental Health Related</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="unique-sessions">0</div>
+                <div class="stat-label">Unique Users</div>
+            </div>
+        </div>
+        
+        <!-- Control Panel -->
+        <div class="admin-section">
+            <h2 class="section-title">System Controls</h2>
+            <div class="controls">
+                <button class="control-btn" onclick="refreshData()">🔄 Refresh Data</button>
+                <button class="control-btn" onclick="testSystem()">🔧 System Test</button>
+            </div>
+        </div>
+        
+        <!-- Configuration Management -->
+        <div class="admin-section">
+            <h2 class="section-title">⚙️ Configuration Management</h2>
+            <div class="config-tabs">
+                <button class="tab-btn active" onclick="showConfigTab('categories')">📁 Categories & Questions</button>
+                <button class="tab-btn" onclick="showConfigTab('keywords')">🔍 Keywords</button>
+                <button class="tab-btn" onclick="showConfigTab('templates')">📝 Response Templates</button>
+                <button class="tab-btn" onclick="showConfigTab('ai-config')">🤖 AI Integration</button>
+                <button class="tab-btn" onclick="showConfigTab('mail-config')">📧 Email Alerts</button>
+                <button class="tab-btn" onclick="showConfigTab('settings')">⚙️ System Settings</button>
+                <button class="tab-btn" onclick="showConfigTab('history')">🕘 Conversation History</button>
+                <button class="tab-btn" onclick="showConfigTab('cleanup')">🗑️ Data Cleanup</button>
+            </div>
+            
+            <!-- Categories & Questions Management -->
+            <div id="config-categories" class="config-content active">
+                <div class="config-header">
+                    <h3>📁 Manage Categories & Preset Questions</h3>
+                    <div class="header-actions">
+                        <button class="add-btn" onclick="showCategoryForm()">+ Add Category</button>
+                    </div>
+                </div>
+                
+                <div class="categories-grid" id="categories-list">
+                    <!-- 动态生成的分类卡片 -->
+                </div>
+                
+                <!-- Category & Questions Form Modal -->
+                <div id="category-modal" class="config-modal">
+                    <div class="modal-content" style="max-width: 1000px; animation: modal-pop 320ms cubic-bezier(.2,.8,.2,1);">
+                        <div class="modal-header">
+                            <h4 id="category-form-title">📝 Add Category & Questions</h4>
+                            <button type="button" class="modal-close" onclick="closeCategoryForm()">×</button>
+                        </div>
+                        <form id="category-form">
+                            <input type="hidden" id="category-id">
+                            
+                            <!-- 分类基本信息 -->
+                            <div class="form-section">
+                                <h5>📋 Category Information</h5>
+                                <div class="form-row" style="display: grid; grid-template-columns: 1fr 150px 150px; gap: 20px;">
+                                    <div class="form-group">
+                                        <label><span class="required">*</span> Category Name (Internal):</label>
+                                        <input type="text" id="category-name" required placeholder="e.g., dormitory, course, library" style="font-family: monospace;">
+                                        <small class="form-hint">Used internally, lowercase English preferred</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Icon:</label>
+                                        <input type="text" id="category-icon" placeholder="🏠" style="text-align: center; font-size: 18px;">
+                                        <small class="form-hint">Emoji</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Sort Order:</label>
+                                        <input type="number" id="category-sort" value="0" min="0" style="text-align: center;">
+                                        <small class="form-hint">Display order</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                    <div class="form-group">
+                                        <label><span class="required">*</span> Display Name (Chinese):</label>
+                                        <input type="text" id="category-display-zh" required placeholder="宿舍">
+                                    </div>
+                                    <div class="form-group">
+                                        <label><span class="required">*</span> Display Name (English):</label>
+                                        <input type="text" id="category-display-en" required placeholder="Dormitory">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="category-active" checked>
+                                        <span class="checkmark"></span>
+                                        Active - Show this category to users
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- 预设问题内容 -->
+                            <div class="form-section">
+                                <h5>❓ Preset Questions (Optional)</h5>
+                                <p class="section-description">Add preset questions that users can quickly select for this category. Leave empty if no preset questions are needed.</p>
+                                
+                                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                    <div class="form-group">
+                                        <label>Chinese Questions (one per line):</label>
+                                        <textarea id="category-questions-zh" rows="6" 
+                                                placeholder="宿舍门禁时间是什么时候？&#10;如何申请宿舍钥匙？&#10;宿舍熄灯时间是几点？&#10;宿舍洗衣房在哪里？&#10;如何报修宿舍设施？"></textarea>
+                                        <small class="form-hint">Each line becomes a clickable question button</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>English Questions (one per line):</label>
+                                        <textarea id="category-questions-en" rows="6" 
+                                                placeholder="What are the dormitory curfew hours?&#10;How to apply for dormitory keys?&#10;What time are lights out in the dormitory?&#10;Where is the dormitory laundry room?&#10;How to report dormitory facility issues?"></textarea>
+                                        <small class="form-hint">Each line becomes a clickable question button</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions" style="margin-top: 30px; display: flex; gap: 15px; justify-content: flex-end;">
+                                <button type="button" class="btn btn-secondary" onclick="closeCategoryForm()">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    💾 Save Category & Questions
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Keywords Management -->
+            <div id="config-keywords" class="config-content">
+                <div class="config-header">
+                    <h3>Manage Keywords</h3>
+                    <button class="add-btn" onclick="showKeywordForm()">+ Add Keyword</button>
+                </div>
+                <div class="form-row" style="display:grid;grid-template-columns:240px 220px 1fr;gap:12px;align-items:center;margin-bottom:12px;">
+                    <div class="form-group" style="margin:0;">
+                        <input type="text" id="kw-search" placeholder="Search keyword..." oninput="onKeywordFiltersChange()" />
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <select id="kw-category-filter" onchange="onKeywordFiltersChange()">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="keywords-list" class="config-list"></div>
+                <div id="keywords-pager" style="display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px;">
+                    <div style="margin-right:auto;color:#718096;display:flex;align-items:center;gap:8px;">
+                        <span>Per page:</span>
+                        <select id="kw-page-size" onchange="changeKeywordPageSize(this.value)">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="prevKeywordPage()">Prev</button>
+                    <span id="keywords-page-info" style="color:#718096;">0 / 0</span>
+                    <button class="btn" onclick="nextKeywordPage()">Next</button>
+                </div>
+                
+                <!-- Keyword Form Modal -->
+                <div id="keyword-modal" class="config-modal">
+                    <div class="modal-content" style="max-width: 560px; animation: modal-pop 320ms cubic-bezier(.2,.8,.2,1);">
+                        <div class="modal-header">
+                            <h4 id="keyword-form-title">Add Keyword</h4>
+                            <button type="button" class="modal-close" onclick="closeKeywordForm()">×</button>
+                        </div>
+                        <form id="keyword-form">
+                            <input type="hidden" id="keyword-id">
+                            <div class="form-group">
+                                <label>Keyword:</label>
+                                <input type="text" id="keyword-text" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category:</label>
+                                <select id="keyword-category" required>
+                                    <option value="">Select Category</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Weight:</label>
+                                <input type="number" step="0.1" id="keyword-weight" value="1.0" min="0" max="2">
+                            </div>
+                            <div class="form-group">
+                                <label>Language:</label>
+                                <select id="keyword-language">
+                                    <option value="both">Both</option>
+                                    <option value="zh">Chinese</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="keyword-psychology"> Psychology Related
+                                </label>
+                            </div>
+                            <div class="form-group" id="psychology-level-group" style="display: none;">
+                                <label>Psychology Level:</label>
+                                <select id="keyword-psychology-level">
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="keyword-active" checked> Active
+                                </label>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit">Save</button>
+                                <button type="button" onclick="closeKeywordForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Response Templates Management -->
+            <div id="config-templates" class="config-content">
+                <div class="config-header">
+                    <h3>Manage Response Templates</h3>
+                    <button class="add-btn" onclick="showTemplateForm()">+ Add Template</button>
+                </div>
+                <div id="templates-list" class="config-list"></div>
+                
+                <!-- Template Form Modal -->
+                <div id="template-modal" class="config-modal">
+                    <div class="modal-content" style="max-width: 560px; animation: modal-pop 320ms cubic-bezier(.2,.8,.2,1);">
+                        <div class="modal-header">
+                            <h4 id="template-form-title">Add Template</h4>
+                            <button type="button" class="modal-close" onclick="closeTemplateForm()">×</button>
+                        </div>
+                        <form id="template-form">
+                            <input type="hidden" id="template-id">
+                            <div class="form-group">
+                                <label>Title:</label>
+                                <input type="text" id="template-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category:</label>
+                                <select id="template-category" required>
+                                    <option value="">Select Category</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Chinese Content:</label>
+                                <textarea id="template-content-zh" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>English Content:</label>
+                                <textarea id="template-content-en" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Keywords (comma-separated):</label>
+                                <input type="text" id="template-keywords" placeholder="keyword1, keyword2, keyword3">
+                            </div>
+                            <div class="form-group">
+                                <label>🔗 Link Buttons (Telegram-style):</label>
+                                <div id="template-links-container">
+                                    <!-- Links will be added dynamically -->
+                                </div>
+                                <button type="button" class="add-link-btn" onclick="addTemplateLink()">+ Add Link</button>
+                            </div>
+                            <div class="form-group">
+                                <label>Priority:</label>
+                                <input type="number" id="template-priority" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="template-active" checked> Active
+                                </label>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit">Save</button>
+                                <button type="button" onclick="closeTemplateForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            
+            <!-- AI Integration Management -->
+            <div id="config-ai-config" class="config-content">
+                <div class="config-header">
+                    <h3>🤖 AI Integration Settings</h3>
+                </div>
+                
+                <div class="ai-config-section">
+                    <div class="config-item">
+                        <h4>🔌 AI Provider Configuration</h4>
+                        <div class="form-group">
+                            <label>AI Provider:</label>
+                            <select id="ai-provider">
+                                <option value="openai">OpenAI (ChatGPT)</option>
+                                <option value="claude">Claude (Anthropic)</option>
+                                <option value="gemini">Google Gemini</option>
+                                <option value="ollama">Ollama (Local)</option>
+                                <option value="custom">Custom API</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>API Endpoint:</label>
+                            <input type="url" id="ai-api-endpoint" placeholder="https://api.openai.com/v1/chat/completions">
+                        </div>
+                        <div class="form-group">
+                            <label>API Key:</label>
+                            <input type="password" id="ai-api-key" placeholder="sk-...">
+                        </div>
+                        <div class="form-group">
+                            <label>Model Name:</label>
+                            <input type="text" id="ai-model" placeholder="gpt-3.5-turbo">
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="ai-enabled"> Enable AI Integration
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="config-item">
+                        <h4>⚙️ AI Response Settings</h4>
+                        <div class="form-group">
+                            <label>Maximum Response Length:</label>
+                            <input type="number" id="ai-max-tokens" value="1000" min="100" max="4000">
+                        </div>
+                        <div class="form-group">
+                            <label>Response Temperature (0-2):</label>
+                            <input type="number" id="ai-temperature" value="0.7" min="0" max="2" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>System Prompt for Psychology (Chinese):</label>
+                            <textarea id="ai-psychology-prompt-zh" rows="4" placeholder="你是一位专业的心理健康咨询助手...">你是一位专业的心理健康咨询助手。请提供支持性、富有同理心的回复，同时始终强调寻求专业帮助的重要性。切勿进行诊断或提供医疗建议。</textarea>
+                            <small class="form-hint">中文用户的心理咨询 AI 系统提示词</small>
+                        </div>
+                        <div class="form-group">
+                            <label>System Prompt for Psychology (English):</label>
+                            <textarea id="ai-psychology-prompt-en" rows="4" placeholder="You are a professional mental health counselor assistant...">You are a professional mental health counselor assistant. Provide supportive, empathetic responses while always emphasizing the importance of seeking professional help. Never diagnose or provide medical advice.</textarea>
+                            <small class="form-hint">English users' psychology counseling AI system prompt</small>
+                        </div>
+                    </div>
+                    
+                    <div class="config-item">
+                        <h4>🔄 AI Handover Settings</h4>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="ai-auto-handover" checked> Auto-handover for psychology questions
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Handover Button Text (Chinese):</label>
+                            <input type="text" id="ai-handover-text-zh" value="转交AI助手">
+                        </div>
+                        <div class="form-group">
+                            <label>Handover Button Text (English):</label>
+                            <input type="text" id="ai-handover-text-en" value="Switch to AI Assistant">
+                        </div>
+                        <div class="form-group">
+                            <label>AI Takeover Message (Chinese):</label>
+                            <textarea id="ai-takeover-msg-zh" rows="2">AI助手已接管对话。我会为您提供更详细的帮助。</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>AI Takeover Message (English):</label>
+                            <textarea id="ai-takeover-msg-en" rows="2">AI Assistant has taken over the conversation. I'll provide you with more detailed assistance.</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="config-actions">
+                        <button class="control-btn" onclick="testAIConnection()">🧪 Test AI Connection</button>
+                        <button class="control-btn" onclick="saveAIConfig()">💾 Save AI Configuration</button>
+                        <button class="control-btn" onclick="loadAIConfig()">🔄 Reload Configuration</button>
+                    </div>
+                    
+                    <div class="ai-status" id="ai-status">
+                        <div class="status-item">
+                            <span class="status-indicator status-offline"></span>
+                            <span>AI Connection Status: Not Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mail / SMTP Settings -->
+            <div id="config-mail-config" class="config-content">
+                <div class="config-header">
+                    <h3>📧 Email / SMTP Settings</h3>
+                </div>
+                <div class="ai-config-section">
+                    <div class="config-item">
+                        <h4>SMTP Server</h4>
+                        <div class="form-group">
+                            <label>Enable Email Alerts:</label>
+                            <input type="checkbox" id="mail-enabled">
+                        </div>
+                        <div class="form-group">
+                            <label>SMTP Host:</label>
+                            <input type="text" id="mail-smtp-host" placeholder="smtp.example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>SMTP Port:</label>
+                            <input type="number" id="mail-smtp-port" value="587">
+                        </div>
+                        <div class="form-group">
+                            <label>Security:</label>
+                            <select id="mail-smtp-secure">
+                                <option value="none">None</option>
+                                <option value="tls" selected>TLS</option>
+                                <option value="ssl">SSL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Auth Method:</label>
+                            <select id="mail-auth-method">
+                                <option value="auto">Auto</option>
+                                <option value="login">LOGIN</option>
+                                <option value="plain">PLAIN</option>
+                                <option value="cram-md5">CRAM-MD5</option>
+                            </select>
+                            <small class="form-hint">若出现535，可尝试切换为 LOGIN 或 PLAIN</small>
+                        </div>
+                        <div class="form-group">
+                            <label>SMTP Username:</label>
+                            <input type="text" id="mail-smtp-username" placeholder="user@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>SMTP Password:</label>
+                            <input type="text" id="mail-smtp-password" placeholder="明文展示">
+                            <small class="form-hint">按你的要求：明文显示；留空则继续沿用已保存的密码</small>
+                        </div>
+                    </div>
+                    <div class="config-item">
+                        <h4>Sender & Alerts</h4>
+                        <div class="form-group">
+                            <label>From Email:</label>
+                            <input type="email" id="mail-from-email" placeholder="no-reply@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="mail-force-from-username"> Force From Email = Username
+                            </label>
+                            <small class="form-hint">某些服务（如 Sidecloud Postal）要求使用用户名作为发件地址</small>
+                        </div>
+                        <div class="form-group">
+                            <label>From Name:</label>
+                            <input type="text" id="mail-from-name" placeholder="UON Q&A System">
+                        </div>
+                        <div class="form-group">
+                            <label>Alert Recipients (comma separated):</label>
+                            <input type="text" id="mail-alert-recipients" placeholder="a@ex.com,b@ex.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Trigger Levels:</label>
+                            <div style="display:flex;gap:16px;align-items:center;">
+                                <label><input type="checkbox" class="mail-level" value="medium"> Medium</label>
+                                <label><input type="checkbox" class="mail-level" value="high"> High</label>
+                                <label><input type="checkbox" class="mail-level" value="urgent" checked> Urgent</label>
+                            </div>
+                            <small class="form-hint">选中的风险级别将触发邮件</small>
+                        </div>
+                    </div>
+                    <div class="config-actions">
+                        <button class="control-btn" onclick="testMail()">🧪 Send Test Email</button>
+                        <button class="control-btn" onclick="saveMailConfig()">💾 Save Mail Configuration</button>
+                        <button class="control-btn" onclick="loadMailConfig()">🔄 Reload</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Settings Management -->
+            <div id="config-settings" class="config-content">
+                <div class="config-header">
+                    <h3>System Settings</h3>
+                    <button class="add-btn" onclick="showSettingForm()">+ Add Setting</button>
+                </div>
+                
+                <!-- DeepL Translation Settings -->
+                <div class="config-section" style="margin-bottom: 30px;">
+                    <h4>🌐 DeepL Translation Settings</h4>
+                    <p style="color: #718096; margin-bottom: 20px;">Configure DeepL API for professional AI response translation.</p>
+                    
+                    <div class="form-group">
+                        <label>DeepL API Key:</label>
+                        <input type="text" id="deepl-api-key" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx" style="width: 100%; max-width: 500px;">
+                        <small class="form-hint">Get your API key from <a href="https://www.deepl.com/pro-api" target="_blank">DeepL Pro API</a> (Free: 500,000 chars/month)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>API Type:</label>
+                        <select id="deepl-api-type" style="width: 200px;">
+                            <option value="free">Free API</option>
+                            <option value="pro">Pro API</option>
+                        </select>
+                        <small class="form-hint">Free: api-free.deepl.com | Pro: api.deepl.com</small>
+                    </div>
+                    
+                    <div class="config-actions">
+                        <button class="control-btn" onclick="testDeepLTranslation()">🧪 Test Translation</button>
+                        <button class="control-btn" onclick="saveDeepLConfig()">💾 Save DeepL Config</button>
+                        <button class="control-btn" onclick="loadDeepLConfig()">🔄 Reload</button>
+                    </div>
+                    
+                    <div id="deepl-test-result" style="margin-top: 15px; padding: 12px; border-radius: 6px; display: none;"></div>
+                </div>
+                
+                <!-- Welcome Text Settings -->
+                <div class="config-section" style="margin-bottom: 30px;">
+                    <h4>👋 Welcome Text Settings</h4>
+                    <p style="color: #718096; margin-bottom: 20px;">Customize the welcome message displayed on the homepage.</p>
+                    
+                    <div class="form-group">
+                        <label>Welcome Text (Chinese):</label>
+                        <textarea id="welcome-text-zh" rows="3" placeholder="欢迎使用ASK Uon！可以询问宿舍、课程、成绩、食堂、图书馆等相关问题，获得即时帮助。"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Welcome Text (English):</label>
+                        <textarea id="welcome-text-en" rows="3" placeholder="Welcome to ASK Uon! Ask questions about dormitory, courses, grades, cafeteria, library, and get instant help."></textarea>
+                    </div>
+                    
+                    <div class="config-actions">
+                        <button class="control-btn" onclick="saveWelcomeText()">💾 Save Welcome Text</button>
+                        <button class="control-btn" onclick="loadWelcomeText()">🔄 Reload</button>
+                    </div>
+                </div>
+                
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
+                
+                <div id="settings-list" class="config-list"></div>
+                
+                <!-- Setting Form Modal -->
+                <div id="setting-modal" class="config-modal">
+                    <div class="modal-content" style="max-width: 560px; animation: modal-pop 320ms cubic-bezier(.2,.8,.2,1);">
+                        <div class="modal-header">
+                            <h4 id="setting-form-title">Add Setting</h4>
+                            <button type="button" class="modal-close" onclick="closeSettingForm()">×</button>
+                        </div>
+                        <form id="setting-form">
+                            <div class="form-group">
+                                <label>Setting Key:</label>
+                                <input type="text" id="setting-key" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Setting Value:</label>
+                                <textarea id="setting-value" rows="2" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Description:</label>
+                                <input type="text" id="setting-description">
+                            </div>
+                            <div class="form-group">
+                                <label>Category:</label>
+                                <select id="setting-category">
+                                    <option value="general">General</option>
+                                    <option value="psychology">Psychology</option>
+                                    <option value="limits">Limits</option>
+                                    <option value="privacy">Privacy</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="setting-active" checked> Active
+                                </label>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit">Save</button>
+                                <button type="button" onclick="closeSettingForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Cleanup Management -->
+            <div id="config-cleanup" class="config-content">
+                <div class="config-header">
+                    <h3>Data Cleanup</h3>
+                </div>
+                
+                <div class="cleanup-section">
+                    <div class="cleanup-item">
+                        <h4>🗑️ Clear All Questions</h4>
+                        <p>Remove all user questions and responses from the database. This action cannot be undone.</p>
+                        <button class="cleanup-btn danger" onclick="confirmCleanup('all_questions', 'all questions and responses')">
+                            Clear All Questions
+                        </button>
+                    </div>
+                    
+                    <div class="cleanup-item">
+                        <h4>📅 Clear Old Questions</h4>
+                        <p>Remove questions older than a specified number of days.</p>
+                        <div class="cleanup-controls">
+                            <label>Days to keep:</label>
+                            <input type="number" id="days-to-keep" value="30" min="1" max="365">
+                            <button class="cleanup-btn warning" onclick="cleanupOldQuestions()">
+                                Clear Old Questions
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="cleanup-item">
+                        <h4>💬 Clear Conversation History</h4>
+                        <p>Delete old conversation history records to free up database space.</p>
+                        <div style="margin:10px 0;">
+                            <label style="display:block;margin-bottom:8px;font-weight:600;font-size:15px;color:#1a202c;">Delete conversations older than:</label>
+                            <select id="cleanup-history-days" style="padding:8px 12px;border-radius:6px;border:1px solid #cbd5e0;font-size:14px;">
+                                <option value="0">All (Delete Everything)</option>
+                                <option value="1">1 day</option>
+                                <option value="3">3 days</option>
+                                <option value="7">7 days</option>
+                                <option value="30" selected>30 days</option>
+                                <option value="60">60 days</option>
+                                <option value="90">90 days</option>
+                                <option value="180">180 days</option>
+                                <option value="365">1 year</option>
+                            </select>
+                        </div>
+                        <button class="cleanup-btn danger" onclick="cleanupConversationHistory()">
+                            🗑️ Clean Conversation History
+                        </button>
+                    </div>
+                    
+                    <div class="cleanup-item">
+                        <h4>🧠 Clear Psychology Records</h4>
+                        <p>Remove all psychology-related attention records and alerts.</p>
+                        <button class="cleanup-btn warning" onclick="confirmCleanup('psychology_records', 'all psychology records')">
+                            Clear Psychology Records
+                        </button>
+                    </div>
+                    
+                    <div class="cleanup-item">
+                        <h4>🔑 Clear Keyword Matches</h4>
+                        <p>Remove all keyword matching records while keeping the questions.</p>
+                        <button class="cleanup-btn warning" onclick="confirmCleanup('keyword_matches', 'all keyword matching records')">
+                            Clear Keyword Matches
+                        </button>
+                    </div>
+                    
+                    <div class="cleanup-item">
+                        <h4>💾 Database Optimization</h4>
+                        <p>Optimize database tables to improve performance.</p>
+                        <button class="cleanup-btn success" onclick="optimizeDatabase()">
+                            Optimize Database
+                        </button>
+                    </div>
+                    
+                    <div class="cleanup-item">
+                        <h4>📊 Reset Statistics</h4>
+                        <p>Reset all usage statistics and counters.</p>
+                        <button class="cleanup-btn warning" onclick="confirmCleanup('reset_stats', 'all statistics')">
+                            Reset Statistics
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="cleanup-status" id="cleanup-status"></div>
+                
+                <!-- Cleanup Confirmation Modal -->
+                <div id="cleanup-modal" class="config-modal">
+                    <div class="modal-content" style="max-width:500px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="text-align:center;margin-bottom:20px;">
+                            <div style="width:80px;height:80px;margin:0 auto 20px;background:linear-gradient(135deg,#ff6b6b,#ee5a6f);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 8px 16px rgba(238,90,111,0.3);">
+                                🗑️
+                            </div>
+                            <h4 style="margin:0;font-size:24px;color:#2d3748;">确认删除数据</h4>
+                        </div>
+                        <div style="background:#fff3cd;border-left:4px solid#ffc107;padding:20px;border-radius:8px;margin:20px 0;">
+                            <p style="margin:0 0 12px 0;font-size:16px;color:#856404;"><strong>⚠️ 警告</strong></p>
+                            <p style="margin:0 0 8px 0;font-size:15px;color:#856404;">您即将永久删除 <strong id="cleanup-target" style="color:#d97706;"></strong></p>
+                            <p style="margin:0;font-size:14px;color:#92400e;"><strong>此操作无法撤销！</strong></p>
+                        </div>
+                        <div style="display:flex;gap:12px;justify-content:center;margin-top:30px;">
+                            <button type="button" onclick="closeCleanupModal()" style="flex:1;padding:12px 24px;background:#e2e8f0;color:#4a5568;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#cbd5e0'" onmouseout="this.style.background='#e2e8f0'">
+                                取消
+                            </button>
+                            <button type="button" class="cleanup-btn danger" id="confirm-cleanup-btn" style="flex:1;padding:12px 24px;background:linear-gradient(135deg,#ef4444,#dc2626);color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(239,68,68,0.4);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(239,68,68,0.5)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 12px rgba(239,68,68,0.4)'">
+                                🗑️ 确认删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversation History -->
+            <div id="config-history" class="config-content">
+                <div class="config-header">
+                    <h3>🕘 Conversation History</h3>
+                </div>
+                <div class="form-row" style="display:grid;grid-template-columns:200px 200px 200px 200px 1fr;gap:12px;align-items:end;margin-bottom:16px;">
+                    <div class="form-group">
+                        <label>Student ID (7 digits, no C):</label>
+                        <input type="text" id="hist-student-id" placeholder="e.g. 1234567" maxlength="7">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date:</label>
+                        <input type="date" id="hist-start">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date:</label>
+                        <input type="date" id="hist-end">
+                    </div>
+                    <div class="form-group" style="display:flex;gap:8px;">
+                        <button class="btn btn-primary" onclick="loadHistory(0)">🔍 Search</button>
+                        <button class="btn btn-secondary" onclick="resetHistoryFilters()">Reset</button>
+                    </div>
+                </div>
+                <div id="history-list" class="config-list"></div>
+                <div id="history-pager" style="display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px;">
+                    <button class="btn" onclick="prevHistoryPage()">◀ Prev</button>
+                    <span id="history-page-info" style="color:#718096;">0 / 0</span>
+                    <button class="btn" onclick="nextHistoryPage()">Next ▶</button>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- Mental Health Alerts -->
+        <div class="admin-section">
+            <h2 class="section-title">
+                ⚠️ Mental Health Alerts
+                <span class="alert-badge" id="psychology-alert-count">0</span>
+            </h2>
+            <div id="psychology-alerts">
+                <!-- Mental health related questions will be displayed here -->
+            </div>
+        </div>
+        
+        <!-- Recent Questions -->
+        <div class="admin-section">
+            <h2 class="section-title">📝 Recent Questions</h2>
+            <div id="recent-questions">
+                <!-- Recent questions will be displayed here -->
+            </div>
+        </div>
+        
+        <!-- Keyword Statistics -->
+        <div class="admin-section">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2 class="section-title" style="margin:0;">🔍 Popular Keywords</h2>
+                <select id="keyword-days" onchange="loadPopularKeywords()" style="padding:8px 12px;border-radius:6px;border:1px solid #cbd5e0;font-size:14px;">
+                    <option value="7">Last 7 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="365">Last year</option>
+                </select>
+            </div>
+            <div id="keyword-stats">
+                <p style="color:#718096;text-align:center;padding:40px;">Loading...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Admin Panel JavaScript
+        class AdminPanel {
+            constructor() {
+                this.init();
+                this.refreshData();
+                this.startAutoRefresh();
+            }
+            
+            init() {
+                console.log('Admin panel initialized');
+            }
+            
+            async refreshData() {
+                try {
+                    await Promise.all([
+                        this.loadStats(),
+                        this.loadRecentQuestions(),
+                        this.loadPsychologyAlerts()
+                    ]);
+                    
+                    this.updateStatus(true, 'System Online');
+                } catch (error) {
+                    console.error('Failed to load data:', error);
+                    this.updateStatus(false, 'Connection Failed');
+                }
+            }
+            
+            async loadStats() {
+                try {
+                    const response = await fetch('api/questions.php?action=stats');
+                    const data = await response.json();
+                    
+                    if (data.success && data.stats) {
+                        const stats = data.stats;
+                        document.getElementById('total-questions').textContent = stats.total_questions || 0;
+                        document.getElementById('today-questions').textContent = stats.today_questions || 0;
+                        document.getElementById('psychology-questions').textContent = stats.psychology_questions || 0;
+                        document.getElementById('unique-sessions').textContent = stats.unique_sessions || 0;
+                    }
+                } catch (error) {
+                    console.error('Failed to load statistics:', error);
+                }
+            }
+            
+            async loadRecentQuestions() {
+                try {
+                    const response = await fetch('api/questions.php?action=recent&limit=20');
+                    const data = await response.json();
+                    
+                    if (data.success && data.questions) {
+                        this.displayRecentQuestions(data.questions);
+                    }
+                } catch (error) {
+                    console.error('Failed to load recent questions:', error);
+                }
+            }
+            
+            async loadPsychologyAlerts() {
+                try {
+                    const response = await fetch('api/questions.php?action=psychology_alerts');
+                    const data = await response.json();
+                    
+                    if (data.success && data.alerts) {
+                        this.displayPsychologyAlerts(data.alerts);
+                    }
+                } catch (error) {
+                    console.error('Failed to load mental health alerts:', error);
+                    // Simulate some alert data for display
+                    this.displayPsychologyAlerts([]);
+                }
+            }
+            
+            displayRecentQuestions(questions) {
+                const container = document.getElementById('recent-questions');
+                if (!questions || questions.length === 0) {
+                    container.innerHTML = '<p>No recent questions</p>';
+                    return;
+                }
+                
+                container.innerHTML = questions.map(q => {
+                    const date = new Date(q.created_at);
+                    const timeStr = date.toLocaleString('en-US');
+                    const isPsychology = q.is_psychology_related == 1;
+                    const studentIdDisplay = q.student_id ? `C${q.student_id}` : 'N/A';
+                    
+                    return `
+                        <div class="question-item ${isPsychology ? 'psychology' : ''}">
+                            <div class="question-meta">
+                                ${timeStr} | ${q.language === 'zh' ? 'Chinese' : 'English'} | Student ID: ${studentIdDisplay}
+                                ${isPsychology ? '<span class="alert-badge">Mental Health</span>' : ''}
+                            </div>
+                            <div class="question-text">Q: ${this.escapeHtml(q.user_question)}</div>
+                            <div class="question-response">A: ${this.escapeHtml(q.response_text)}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            displayPsychologyAlerts(alerts) {
+                const container = document.getElementById('psychology-alerts');
+                const countBadge = document.getElementById('psychology-alert-count');
+                
+                if (!alerts || alerts.length === 0) {
+                    container.innerHTML = '<p>✅ No mental health alerts</p>';
+                    countBadge.textContent = '0';
+                    return;
+                }
+                
+                countBadge.textContent = alerts.length;
+                
+                container.innerHTML = alerts.map(alert => {
+                    const isUrgent = alert.attention_level === 'urgent';
+                    return `
+                        <div class="question-item ${isUrgent ? 'urgent' : 'psychology'}">
+                            <div class="question-meta">
+                                ${alert.created_at} | Risk Level: ${this.getRiskLevel(alert.attention_level)}
+                                ${isUrgent ? '<span class="alert-badge">Urgent</span>' : ''}
+                            </div>
+                            <div class="question-text">Q: ${this.escapeHtml(alert.question)}</div>
+                            <div class="question-response">Triggered Keywords: ${alert.keywords_triggered}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            getRiskLevel(level) {
+                const levels = {
+                    'low': 'Low',
+                    'medium': 'Medium',
+                    'high': 'High',
+                    'urgent': 'Urgent'
+                };
+                return levels[level] || level;
+            }
+            
+            updateStatus(isOnline, statusText) {
+                const statusIndicator = document.getElementById('system-status');
+                const statusTextEl = document.getElementById('status-text');
+                
+                statusIndicator.className = `status-indicator ${isOnline ? 'status-online' : 'status-offline'}`;
+                statusTextEl.textContent = statusText;
+            }
+            
+            startAutoRefresh() {
+                // Auto refresh data every 30 seconds
+                setInterval(() => {
+                    this.refreshData();
+                }, 30000);
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+        
+        // Global functions
+        function refreshData() {
+            if (window.adminPanel) {
+                window.adminPanel.refreshData();
+            }
+        }
+        
+        
+        
+        function testSystem() {
+            fetch('api/questions.php?action=test')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ System test passed\nDatabase connection normal');
+                    } else {
+                        alert('❌ System test failed\n' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    alert('❌ System test failed\nNetwork connection error');
+                });
+        }
+        
+        // Configuration Management Functions
+        let configData = {
+            categories: [],
+            keywords: [],
+            templates: [],
+            settings: []
+        };
+
+        // DeepL Translation Management
+        async function loadDeepLConfig() {
+            try {
+                const response = await fetch('api/admin-config.php?action=system_settings&category=translation');
+                const data = await response.json();
+                if (data.success) {
+                    const settings = data.data;
+                    const apiKey = settings.find(s => s.setting_key === 'deepl_api_key');
+                    const apiType = settings.find(s => s.setting_key === 'deepl_api_type');
+                    
+                    if (apiKey) {
+                        document.getElementById('deepl-api-key').value = apiKey.setting_value || '';
+                    }
+                    if (apiType) {
+                        document.getElementById('deepl-api-type').value = apiType.setting_value || 'free';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load DeepL config:', error);
+            }
+        }
+        
+        async function saveDeepLConfig() {
+            const apiKey = document.getElementById('deepl-api-key').value.trim();
+            const apiType = document.getElementById('deepl-api-type').value;
+            
+            if (!apiKey) {
+                alert('Please enter DeepL API Key');
+                return;
+            }
+            
+            try {
+                // Save API Key
+                const formDataKey = new FormData();
+                formDataKey.append('action', 'system_settings');
+                formDataKey.append('method', 'save');
+                formDataKey.append('data[setting_key]', 'deepl_api_key');
+                formDataKey.append('data[setting_value]', apiKey);
+                formDataKey.append('data[description]', 'DeepL API Key');
+                formDataKey.append('data[category]', 'translation');
+                formDataKey.append('data[is_active]', 1);
+                
+                const responseKey = await fetch('api/admin-config.php?action=system_settings', {
+                    method: 'POST',
+                    body: formDataKey
+                });
+                const dataKey = await responseKey.json();
+                
+                // Save API Type
+                const formDataType = new FormData();
+                formDataType.append('action', 'system_settings');
+                formDataType.append('method', 'save');
+                formDataType.append('data[setting_key]', 'deepl_api_type');
+                formDataType.append('data[setting_value]', apiType);
+                formDataType.append('data[description]', 'DeepL API Type (free/pro)');
+                formDataType.append('data[category]', 'translation');
+                formDataType.append('data[is_active]', 1);
+                
+                const responseType = await fetch('api/admin-config.php?action=system_settings', {
+                    method: 'POST',
+                    body: formDataType
+                });
+                const dataType = await responseType.json();
+                
+                if (dataKey.success && dataType.success) {
+                    alert('✅ DeepL configuration saved successfully!');
+                } else {
+                    alert('❌ Failed to save DeepL configuration');
+                }
+            } catch (error) {
+                console.error('Failed to save DeepL config:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+        
+        async function testDeepLTranslation() {
+            const apiKey = document.getElementById('deepl-api-key').value.trim();
+            const apiType = document.getElementById('deepl-api-type').value;
+            const resultDiv = document.getElementById('deepl-test-result');
+            
+            if (!apiKey) {
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#fee';
+                resultDiv.style.color = '#c00';
+                resultDiv.textContent = '❌ Please enter DeepL API Key first';
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#fef3c7';
+            resultDiv.style.color = '#92400e';
+            resultDiv.textContent = '⏳ Testing translation...';
+            
+            try {
+                // 通过后端 PHP 测试翻译（避免 CORS 问题）
+                const response = await fetch('api/admin-config.php?action=test_deepl_translation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        api_key: apiKey,
+                        api_type: apiType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.style.background = '#d1fae5';
+                    resultDiv.style.color = '#065f46';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Translation Test Successful!</strong><br><br>
+                        <strong>Original:</strong><br>
+                        ${data.original}<br><br>
+                        <strong>Translated:</strong><br>
+                        ${data.translated}
+                    `;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('DeepL test failed:', error);
+                resultDiv.style.background = '#fee2e2';
+                resultDiv.style.color = '#991b1b';
+                resultDiv.innerHTML = `
+                    <strong>❌ Translation Test Failed</strong><br><br>
+                    ${error.message}<br><br>
+                    <small>Please check:<br>
+                    1. API Key is correct<br>
+                    2. API Type matches your account (Free/Pro)<br>
+                    3. You have remaining quota</small>
+                `;
+            }
+        }
+        
+        // Welcome Text Management
+        async function loadWelcomeText() {
+            try {
+                const response = await fetch('api/admin-config.php?action=system_settings&category=general');
+                const data = await response.json();
+                if (data.success) {
+                    const settings = data.data;
+                    const welcomeZh = settings.find(s => s.setting_key === 'welcome_text_zh');
+                    const welcomeEn = settings.find(s => s.setting_key === 'welcome_text_en');
+                    
+                    if (welcomeZh) {
+                        document.getElementById('welcome-text-zh').value = welcomeZh.setting_value;
+                    }
+                    if (welcomeEn) {
+                        document.getElementById('welcome-text-en').value = welcomeEn.setting_value;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load welcome text:', error);
+                alert('Failed to load welcome text');
+            }
+        }
+        
+        async function saveWelcomeText() {
+            const welcomeZh = document.getElementById('welcome-text-zh').value;
+            const welcomeEn = document.getElementById('welcome-text-en').value;
+            
+            console.log('Saving welcome text:', { welcomeZh, welcomeEn });
+            
+            try {
+                // Save Chinese text
+                const formDataZh = new FormData();
+                formDataZh.append('action', 'system_settings');
+                formDataZh.append('method', 'save');
+                formDataZh.append('data[setting_key]', 'welcome_text_zh');
+                formDataZh.append('data[setting_value]', welcomeZh);
+                formDataZh.append('data[description]', '首页欢迎文字（中文）');
+                formDataZh.append('data[category]', 'general');
+                formDataZh.append('data[is_active]', 1);
+                
+                console.log('Sending Chinese text...');
+                const responseZh = await fetch('api/admin-config.php?action=system_settings', {
+                    method: 'POST',
+                    body: formDataZh
+                });
+                
+                console.log('Response status (ZH):', responseZh.status);
+                const textZh = await responseZh.text();
+                console.log('Response text (ZH):', textZh);
+                
+                let dataZh;
+                try {
+                    dataZh = JSON.parse(textZh);
+                } catch (e) {
+                    console.error('Failed to parse JSON (ZH):', e);
+                    throw new Error('Invalid JSON response: ' + textZh.substring(0, 100));
+                }
+                
+                // Save English text
+                const formDataEn = new FormData();
+                formDataEn.append('action', 'system_settings');
+                formDataEn.append('method', 'save');
+                formDataEn.append('data[setting_key]', 'welcome_text_en');
+                formDataEn.append('data[setting_value]', welcomeEn);
+                formDataEn.append('data[description]', '首页欢迎文字（英文）');
+                formDataEn.append('data[category]', 'general');
+                formDataEn.append('data[is_active]', 1);
+                
+                console.log('Sending English text...');
+                const responseEn = await fetch('api/admin-config.php?action=system_settings', {
+                    method: 'POST',
+                    body: formDataEn
+                });
+                
+                console.log('Response status (EN):', responseEn.status);
+                const textEn = await responseEn.text();
+                console.log('Response text (EN):', textEn);
+                
+                let dataEn;
+                try {
+                    dataEn = JSON.parse(textEn);
+                } catch (e) {
+                    console.error('Failed to parse JSON (EN):', e);
+                    throw new Error('Invalid JSON response: ' + textEn.substring(0, 100));
+                }
+                
+                console.log('Save result:', { dataZh, dataEn });
+                
+                if (dataZh.success && dataEn.success) {
+                    alert('✅ Welcome text saved successfully!');
+                } else {
+                    const errorMsg = dataZh.message || dataEn.message || dataZh.error || dataEn.error || 'Unknown error';
+                    alert('❌ Failed to save welcome text: ' + errorMsg);
+                    console.error('Save failed:', { dataZh, dataEn });
+                }
+            } catch (error) {
+                console.error('Failed to save welcome text:', error);
+                alert('❌ Failed to save welcome text: ' + error.message);
+            }
+        }
+        
+        // Tab Management
+        function showConfigTab(tabName) {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.config-content').forEach(content => content.classList.remove('active'));
+            
+            // Load configurations when settings tab is opened
+            if (tabName === 'settings') {
+                loadWelcomeText();
+                loadDeepLConfig();
+            }
+            
+            // Add active class to selected tab and content
+            event.target.classList.add('active');
+            document.getElementById(`config-${tabName}`).classList.add('active');
+            
+            // Load data for the selected tab
+            loadConfigData(tabName);
+        }
+
+        // Load configuration data
+        async function loadConfigData(type) {
+            // Cleanup tab doesn't need to load data, it's for operations only
+            if (type === 'cleanup') {
+                return;
+            }
+            if (type === 'history') {
+                await loadHistory(0);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`api/admin-config.php?action=${type}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    configData[type] = data.data;
+                    switch(type) {
+                        case 'categories':
+                            displayCategories(data.data);
+                            populateCategorySelects(data.data);
+                            break;
+                        case 'keywords':
+                            displayKeywords(data.data);
+                            break;
+                        case 'templates':
+                            displayTemplates(data.data);
+                            break;
+                        case 'preset-questions':
+                            // Preset questions are now handled in displayCategories
+                            break;
+                        case 'settings':
+                            displaySettings(data.data);
+                            break;
+                    }
+                }
+            } catch (error) {
+                console.error(`Failed to load ${type}:`, error);
+            }
+        }
+
+        // Conversation History logic
+        let __hist_state = { page: 0, pageSize: 20, total: 0 };
+        function getHistoryFilters() {
+            const sid = document.getElementById('hist-student-id')?.value.trim();
+            const start = document.getElementById('hist-start')?.value;
+            const end = document.getElementById('hist-end')?.value;
+            return { student_id: sid || '', start_date: start || '', end_date: end || '' };
+        }
+        function resetHistoryFilters() {
+            document.getElementById('hist-student-id').value = '';
+            document.getElementById('hist-start').value = '';
+            document.getElementById('hist-end').value = '';
+            loadHistory(0);
+        }
+        async function loadHistory(page = 0) {
+            const filters = getHistoryFilters();
+            const params = new URLSearchParams();
+            if (filters.student_id) params.append('student_id', filters.student_id);
+            if (filters.start_date) params.append('start_date', filters.start_date);
+            if (filters.end_date) params.append('end_date', filters.end_date);
+            params.append('limit', __hist_state.pageSize);
+            params.append('offset', page * __hist_state.pageSize);
+            
+            try {
+                const res = await fetch(`api/admin-config.php?action=history&${params.toString()}`);
+                const data = await res.json();
+                if (data && data.success) {
+                    __hist_state.page = page;
+                    __hist_state.total = data.total || 0;
+                    renderHistoryList(data.data || []);
+                    renderHistoryPager();
+                } else {
+                    document.getElementById('history-list').innerHTML = '<p style="color:#dc3545;font-size:16px;">Failed to load conversation history</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load history:', error);
+                document.getElementById('history-list').innerHTML = '<p style="color:#dc3545;font-size:16px;">Error loading conversation history</p>';
+            }
+        }
+        function renderHistoryList(sessions) {
+            const el = document.getElementById('history-list');
+            if (!sessions || sessions.length === 0) {
+                el.innerHTML = '<p style="color:#718096;font-size:16px;">No conversation sessions found</p>';
+                return;
+            }
+            
+            el.innerHTML = sessions.map((session, idx) => {
+                const startTime = new Date(session.start_time);
+                const endTime = new Date(session.end_time);
+                const startStr = isNaN(startTime.getTime()) ? session.start_time : startTime.toLocaleString();
+                const endStr = isNaN(endTime.getTime()) ? session.end_time : endTime.toLocaleString();
+                const sid = session.student_id ? `C${session.student_id}` : 'Anonymous';
+                const sessionId = `session-${idx}`;
+                
+                // 渲染消息列表
+                const messagesHtml = session.messages.map(msg => {
+                    const msgTime = new Date(msg.created_at);
+                    const msgTimeStr = isNaN(msgTime.getTime()) ? msg.created_at : msgTime.toLocaleTimeString();
+                    const isUser = msg.message_type === 'user';
+                    const icon = isUser ? '👤' : '🤖';
+                    const role = isUser ? 'User' : 'Assistant';
+                    
+                    return `
+                        <div style="margin:12px 0;padding:12px;background:${isUser ? '#f0f9ff' : '#f0fdf4'};border-radius:8px;border-left:4px solid ${isUser ? '#3b82f6' : '#10b981'};">
+                            <div style="font-size:14px;color:#64748b;margin-bottom:6px;">
+                                ${icon} <strong>${role}</strong> · ${msgTimeStr}
+                            </div>
+                            <div style="font-size:15px;line-height:1.6;white-space:pre-wrap;color:#1e293b;">${(msg.message_content || '').replace(/</g,'&lt;')}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                return `
+                    <div class="config-item" style="margin-bottom:16px;">
+                        <div class="config-item-info">
+                            <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleSession('${sessionId}')">
+                                <div>
+                                    <div class="config-item-title" style="font-size:18px;margin-bottom:8px;">
+                                        💬 Session: ${sid} 
+                                        <span style="font-size:14px;color:#64748b;font-weight:normal;">
+                                            (${session.message_count} messages)
+                                        </span>
+                                    </div>
+                                    <div class="config-item-details" style="font-size:15px;">
+                                        🕐 Start: ${startStr} | 🕑 End: ${endStr} | 🌐 ${session.language || 'N/A'} | 📁 ${session.category || 'N/A'}
+                                    </div>
+                                </div>
+                                <div id="${sessionId}-toggle" style="font-size:24px;transition:transform 0.3s;">▼</div>
+                            </div>
+                            <div id="${sessionId}" style="display:none;margin-top:16px;padding-top:16px;border-top:2px solid #e2e8f0;">
+                                ${messagesHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function toggleSession(sessionId) {
+            const content = document.getElementById(sessionId);
+            const toggle = document.getElementById(sessionId + '-toggle');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.display = 'none';
+                toggle.style.transform = 'rotate(0deg)';
+            }
+        }
+        function renderHistoryPager() {
+            const info = document.getElementById('history-page-info');
+            const totalPages = Math.max(1, Math.ceil(__hist_state.total / __hist_state.pageSize));
+            info.textContent = `${__hist_state.page + 1} / ${totalPages}`;
+        }
+        function prevHistoryPage() {
+            if (__hist_state.page > 0) loadHistory(__hist_state.page - 1);
+        }
+        function nextHistoryPage() {
+            const totalPages = Math.max(1, Math.ceil(__hist_state.total / __hist_state.pageSize));
+            if (__hist_state.page + 1 < totalPages) loadHistory(__hist_state.page + 1);
+        }
+        
+        
+        // Popular Keywords
+        async function loadPopularKeywords() {
+            const days = document.getElementById('keyword-days')?.value || 30;
+            const container = document.getElementById('keyword-stats');
+            
+            try {
+                container.innerHTML = '<p style="color:#718096;text-align:center;padding:40px;">Loading...</p>';
+                
+                const response = await fetch(`api/admin-config.php?action=popular_keywords&days=${days}&limit=20`);
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    const maxCount = Math.max(...data.data.map(k => k.count));
+                    
+                    container.innerHTML = `
+                        <div style="display: grid; gap: 12px;">
+                            ${data.data.map((kw, idx) => {
+                                const percentage = (kw.count / maxCount * 100).toFixed(0);
+                                const colors = [
+                                    { bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', text: '#667eea' },
+                                    { bg: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', text: '#f5576c' },
+                                    { bg: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', text: '#4facfe' },
+                                    { bg: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', text: '#43e97b' },
+                                    { bg: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', text: '#fa709a' }
+                                ];
+                                const color = colors[idx % colors.length];
+                                
+                                return `
+                                    <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)';">
+                                        <div style="min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: ${color.bg}; color: white; font-weight: bold; font-size: 16px; border-radius: 10px;">#${idx + 1}</div>
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 16px;">${kw.matched_keywords}</div>
+                                            <div style="background: #f7fafc; height: 8px; border-radius: 4px; overflow: hidden;">
+                                                <div style="background: ${color.bg}; height: 100%; width: ${percentage}%; transition: width 0.5s ease;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="min-width: 70px; text-align: right;">
+                                            <div style="font-weight: bold; font-size: 24px; color: ${color.text};">${kw.count}</div>
+                                            <div style="font-size: 12px; color: #718096;">queries</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align:center;padding:60px 20px;color:#718096;">
+                            <div style="font-size:4rem;margin-bottom:20px;">🔍</div>
+                            <h3 style="margin:0 0 10px 0;color:#4a5568;">No keyword data available</h3>
+                            <p style="margin:0;font-size:14px;">Keywords will appear here once users start asking questions.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Failed to load popular keywords:', error);
+                container.innerHTML = `
+                    <div style="text-align:center;padding:40px;color:#dc3545;">
+                        <div style="font-size:3rem;margin-bottom:10px;">⚠️</div>
+                        <p>Failed to load keyword statistics</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load popular keywords on page load
+        if (document.getElementById('keyword-stats')) {
+            loadPopularKeywords();
+        }
+
+        // Display Categories with integrated Preset Questions
+        function displayCategories(categories) {
+            const container = document.getElementById('categories-list');
+            if (!categories || categories.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: #718096;">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📁</div>
+                        <h3>No categories found</h3>
+                        <p>Add your first category to get started!</p>
+                        <button class="btn btn-primary" onclick="showCategoryForm()" style="margin-top: 20px;">
+                            + Add First Category
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Load preset questions data for each category
+            Promise.all(categories.map(async cat => {
+                try {
+                    const response = await fetch(`api/admin-config.php?action=preset-questions`);
+                    const data = await response.json();
+                    if (data.success) {
+                        const presetQuestions = data.data.filter(pq => pq.category === cat.name);
+                        cat.presetQuestions = presetQuestions.length > 0 ? presetQuestions[0] : null;
+                    }
+                } catch (error) {
+                    console.error('Error loading preset questions:', error);
+                }
+                return cat;
+            })).then(categoriesWithQuestions => {
+                container.innerHTML = categoriesWithQuestions.map(cat => {
+                    const hasQuestions = cat.presetQuestions && 
+                        (JSON.parse(cat.presetQuestions.questions_zh || '[]').length > 0 || 
+                         JSON.parse(cat.presetQuestions.questions_en || '[]').length > 0);
+                    
+                    const questionsZh = hasQuestions ? JSON.parse(cat.presetQuestions.questions_zh || '[]') : [];
+                    const questionsEn = hasQuestions ? JSON.parse(cat.presetQuestions.questions_en || '[]') : [];
+                    
+                    return `
+                        <div class="category-card">
+                            <div class="category-card-header">
+                                <div class="category-title">
+                                    <div class="category-icon">${cat.icon || '📁'}</div>
+                                    <div class="category-names">
+                                        <div class="category-name-en">${cat.display_name_en}</div>
+                                        <div class="category-name-zh">${cat.display_name_zh}</div>
+                                    </div>
+                                </div>
+                                <span class="status-tag ${cat.is_active ? 'active' : 'inactive'}">
+                                    ${cat.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+                            
+                            <div class="category-meta">
+                                <span>ID: ${cat.name}</span>
+                                <span>Sort: ${cat.sort_order}</span>
+                                <span>Questions: ${questionsZh.length + questionsEn.length}</span>
+                            </div>
+                            
+                            <div class="category-questions">
+                                <h6>Preset Questions</h6>
+                                <div class="questions-preview">
+                                    ${hasQuestions ? `
+                                        ${questionsZh.slice(0, 3).map(q => `<div class="question-item">🇨🇳 ${q}</div>`).join('')}
+                                        ${questionsEn.slice(0, 3).map(q => `<div class="question-item">🇺🇸 ${q}</div>`).join('')}
+                                        ${(questionsZh.length + questionsEn.length) > 6 ? `<div class="question-item" style="font-style: italic; color: #a0aec0;">...and ${(questionsZh.length + questionsEn.length) - 6} more</div>` : ''}
+                                    ` : `
+                                        <div class="no-questions">No preset questions configured</div>
+                                    `}
+                                </div>
+                            </div>
+                            
+                            <div class="category-actions">
+                                <button class="edit-btn" onclick="editCategory(${cat.id})">
+                                    ✏️ Edit
+                                </button>
+                                <button class="delete-btn" onclick="deleteCategory(${cat.id})">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            });
+        }
+
+        // Display Keywords with pagination
+        let __kw_state = { page: 0, pageSize: 10, search: '', category: '' };
+        function changeKeywordPageSize(size) {
+            __kw_state.pageSize = Math.max(1, parseInt(size || 10));
+            __kw_state.page = 0;
+            renderKeywords();
+        }
+        function onKeywordFiltersChange() {
+            __kw_state.search = (document.getElementById('kw-search')?.value || '').trim().toLowerCase();
+            __kw_state.category = document.getElementById('kw-category-filter')?.value || '';
+            __kw_state.page = 0;
+            renderKeywords();
+        }
+        function prevKeywordPage() {
+            if (__kw_state.page > 0) { __kw_state.page--; renderKeywords(); }
+        }
+        function nextKeywordPage() {
+            const total = getFilteredKeywords().length;
+            const totalPages = Math.max(1, Math.ceil(total / __kw_state.pageSize));
+            if (__kw_state.page + 1 < totalPages) { __kw_state.page++; renderKeywords(); }
+        }
+        function renderKeywordsPager() {
+            const total = getFilteredKeywords().length;
+            const totalPages = Math.max(1, Math.ceil(total / __kw_state.pageSize));
+            const info = document.getElementById('keywords-page-info');
+            if (info) info.textContent = `${__kw_state.page + 1} / ${totalPages}`;
+            const sel = document.getElementById('kw-page-size');
+            if (sel && parseInt(sel.value) !== __kw_state.pageSize) sel.value = String(__kw_state.pageSize);
+        }
+        function getFilteredKeywords() {
+            let list = configData.keywords || [];
+            if (__kw_state.search) {
+                const s = __kw_state.search;
+                list = list.filter(kw => (kw.keyword || '').toLowerCase().includes(s));
+            }
+            if (__kw_state.category) {
+                list = list.filter(kw => String(kw.category_id) === String(__kw_state.category));
+            }
+            return list;
+        }
+        function renderKeywords() {
+            const container = document.getElementById('keywords-list');
+            const list = getFilteredKeywords();
+            if (!list || list.length === 0) {
+                container.innerHTML = '<p>No keywords found. Add your first keyword!</p>';
+                renderKeywordsPager();
+                return;
+            }
+            const start = __kw_state.page * __kw_state.pageSize;
+            const pageItems = list.slice(start, start + __kw_state.pageSize);
+            container.innerHTML = pageItems.map(kw => `
+                <div class="config-item">
+                    <div class="config-item-info">
+                        <div class="config-item-title">${kw.keyword}</div>
+                        <div class="config-item-details">
+                            Category: ${kw.category_name} | Weight: ${kw.weight} | Language: ${kw.language} |
+                            <span class="status-badge ${kw.is_active ? 'status-active' : 'status-inactive'}">
+                                ${kw.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                            ${kw.is_psychology ? '<span class="status-badge psychology-badge">Psychology</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="config-item-actions">
+                        <button class="edit-btn" onclick="editKeyword(${kw.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteKeyword(${kw.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+            renderKeywordsPager();
+        }
+        function displayKeywords(keywords) {
+            configData.keywords = keywords || [];
+            __kw_state.page = 0;
+            // 填充分类筛选
+            const sel = document.getElementById('kw-category-filter');
+            if (sel) {
+                const unique = new Map();
+                (configData.keywords || []).forEach(k => {
+                    if (k.category_id && !unique.has(String(k.category_id))) {
+                        unique.set(String(k.category_id), k.category_name || String(k.category_id));
+                    }
+                });
+                const opts = ['<option value="">All Categories</option>'].concat(
+                    Array.from(unique.entries()).map(([id, name]) => `<option value="${id}">${name}</option>`)
+                );
+                sel.innerHTML = opts.join('');
+            }
+            renderKeywords();
+        }
+
+        // Display Templates
+        function displayTemplates(templates) {
+            const container = document.getElementById('templates-list');
+            if (!templates || templates.length === 0) {
+                container.innerHTML = '<p>No templates found. Add your first template!</p>';
+                return;
+            }
+
+            container.innerHTML = templates.map(tpl => `
+                <div class="config-item">
+                    <div class="config-item-info">
+                        <div class="config-item-title">${tpl.title}</div>
+                        <div class="config-item-details">
+                            Category: ${tpl.category_name} | Priority: ${tpl.priority} |
+                            <span class="status-badge ${tpl.is_active ? 'status-active' : 'status-inactive'}">
+                                ${tpl.is_active ? 'Active' : 'Inactive'}
+                            </span><br>
+                            Keywords: ${tpl.keywords || 'None'}
+                        </div>
+                    </div>
+                    <div class="config-item-actions">
+                        <button class="edit-btn" onclick="editTemplate(${tpl.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteTemplate(${tpl.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+
+
+        // Display Settings
+        function displaySettings(settings) {
+            const container = document.getElementById('settings-list');
+            if (!settings || settings.length === 0) {
+                container.innerHTML = '<p>No settings found. Add your first setting!</p>';
+                return;
+            }
+
+            const groupedSettings = settings.reduce((groups, setting) => {
+                const category = setting.category || 'general';
+                if (!groups[category]) groups[category] = [];
+                groups[category].push(setting);
+                return groups;
+            }, {});
+
+            container.innerHTML = Object.entries(groupedSettings).map(([category, categorySettings]) => `
+                <div class="settings-category">
+                    <h4>${category.charAt(0).toUpperCase() + category.slice(1)} Settings</h4>
+                    ${categorySettings.map(setting => `
+                        <div class="config-item">
+                            <div class="config-item-info">
+                                <div class="config-item-title">${setting.setting_key}</div>
+                                <div class="config-item-details">
+                                    Value: ${setting.setting_value} | 
+                                    <span class="status-badge ${setting.is_active ? 'status-active' : 'status-inactive'}">
+                                        ${setting.is_active ? 'Active' : 'Inactive'}
+                                    </span><br>
+                                    ${setting.description || 'No description'}
+                                </div>
+                            </div>
+                            <div class="config-item-actions">
+                                <button class="edit-btn" onclick="editSetting('${setting.setting_key}')">Edit</button>
+                                <button class="delete-btn" onclick="deleteSetting('${setting.setting_key}')">Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        // Category Management with integrated Preset Questions
+        function showCategoryForm(id = null) {
+            const modal = document.getElementById('category-modal');
+            const form = document.getElementById('category-form');
+            const title = document.getElementById('category-form-title');
+            
+            if (id) {
+                const category = configData.categories.find(c => c.id == id);
+                if (category) {
+                    title.textContent = '✏️ Edit Category & Questions';
+                    document.getElementById('category-id').value = category.id;
+                    document.getElementById('category-name').value = category.name;
+                    document.getElementById('category-display-zh').value = category.display_name_zh;
+                    document.getElementById('category-display-en').value = category.display_name_en;
+                    document.getElementById('category-icon').value = category.icon;
+                    document.getElementById('category-sort').value = category.sort_order;
+                    document.getElementById('category-active').checked = category.is_active;
+                    
+                    // Load and populate preset questions for this category
+                    loadCategoryPresetQuestions(category.name);
+                }
+            } else {
+                title.textContent = '📝 Add Category & Questions';
+                form.reset();
+                document.getElementById('category-id').value = '';
+                document.getElementById('category-questions-zh').value = '';
+                document.getElementById('category-questions-en').value = '';
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        // Load preset questions for a specific category
+        async function loadCategoryPresetQuestions(categoryName) {
+            try {
+                const response = await fetch(`api/admin-config.php?action=preset-questions`);
+                const data = await response.json();
+                if (data.success) {
+                    const presetQuestions = data.data.find(pq => pq.category === categoryName);
+                    if (presetQuestions) {
+                        const questionsZh = JSON.parse(presetQuestions.questions_zh || '[]');
+                        const questionsEn = JSON.parse(presetQuestions.questions_en || '[]');
+                        document.getElementById('category-questions-zh').value = questionsZh.join('\n');
+                        document.getElementById('category-questions-en').value = questionsEn.join('\n');
+                    } else {
+                        document.getElementById('category-questions-zh').value = '';
+                        document.getElementById('category-questions-en').value = '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading preset questions:', error);
+                document.getElementById('category-questions-zh').value = '';
+                document.getElementById('category-questions-en').value = '';
+            }
+        }
+
+        function closeCategoryForm() {
+            document.getElementById('category-modal').classList.remove('active');
+        }
+
+
+
+        function editCategory(id) {
+            showCategoryForm(id);
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('Are you sure you want to delete this category? This will also delete all associated keywords and templates.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`api/admin-config.php?action=category&id=${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Category deleted successfully!');
+                    loadConfigData('categories');
+                } else {
+                    alert('Failed to delete category: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error deleting category: ' + error.message);
+            }
+        }
+
+        // Populate category selects
+        function populateCategorySelects(categories) {
+            const selects = document.querySelectorAll('#keyword-category, #template-category');
+            selects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">Select Category</option>' +
+                    categories.map(cat => `<option value="${cat.id}" ${cat.id == currentValue ? 'selected' : ''}>${cat.display_name_en}</option>`).join('');
+            });
+        }
+
+        // Form submissions - Enhanced to handle preset questions
+        document.getElementById('category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const categoryData = {
+                id: document.getElementById('category-id').value || null,
+                name: document.getElementById('category-name').value,
+                display_name_zh: document.getElementById('category-display-zh').value,
+                display_name_en: document.getElementById('category-display-en').value,
+                icon: document.getElementById('category-icon').value,
+                sort_order: parseInt(document.getElementById('category-sort').value),
+                is_active: document.getElementById('category-active').checked
+            };
+
+            try {
+                // First, save the category
+                const categoryResponse = await fetch('api/admin-config.php?action=category', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(categoryData)
+                });
+                
+                const categoryResult = await categoryResponse.json();
+                if (!categoryResult.success) {
+                    throw new Error('Failed to save category: ' + (categoryResult.message || 'Unknown error'));
+                }
+                
+                // Then, save the preset questions if any are provided
+                const questionsZh = document.getElementById('category-questions-zh').value.trim();
+                const questionsEn = document.getElementById('category-questions-en').value.trim();
+                
+                if (questionsZh || questionsEn) {
+                    const questionsZhArray = questionsZh ? questionsZh.split('\n').filter(q => q.trim()) : [];
+                    const questionsEnArray = questionsEn ? questionsEn.split('\n').filter(q => q.trim()) : [];
+                    
+                    const presetQuestionData = {
+                        category: categoryData.name,
+                        category_icon: categoryData.icon,
+                        category_name_zh: categoryData.display_name_zh,
+                        category_name_en: categoryData.display_name_en,
+                        questions_zh: JSON.stringify(questionsZhArray),
+                        questions_en: JSON.stringify(questionsEnArray),
+                        sort_order: categoryData.sort_order,
+                        is_active: categoryData.is_active
+                    };
+                    
+                    const questionsResponse = await fetch('api/admin-config.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            action: 'preset_questions',
+                            method: 'save',
+                            ...presetQuestionData
+                        })
+                    });
+                    
+                    const questionsResult = await questionsResponse.json();
+                    if (!questionsResult.success) {
+                        console.warn('Failed to save preset questions:', questionsResult.error);
+                        // Don't fail the whole operation, just warn
+                    }
+                } else {
+                    // If no questions provided, try to delete existing preset questions for this category
+                    try {
+                        const deleteResponse = await fetch('api/admin-config.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams({
+                                action: 'preset_questions',
+                                method: 'delete_by_category',
+                                category: categoryData.name
+                            })
+                        });
+                    } catch (error) {
+                        console.warn('Failed to delete existing preset questions:', error);
+                    }
+                }
+                
+                alert('Category and questions saved successfully!');
+                closeCategoryForm();
+                loadConfigData('categories');
+                
+            } catch (error) {
+                alert('Error saving category: ' + error.message);
+            }
+        });
+
+        // Keyword Management Functions
+        function showKeywordForm(id = null) {
+            const modal = document.getElementById('keyword-modal');
+            const form = document.getElementById('keyword-form');
+            const title = document.getElementById('keyword-form-title');
+            
+            if (id) {
+                const keyword = configData.keywords.find(k => k.id == id);
+                if (keyword) {
+                    title.textContent = 'Edit Keyword';
+                    document.getElementById('keyword-id').value = keyword.id;
+                    document.getElementById('keyword-text').value = keyword.keyword;
+                    document.getElementById('keyword-category').value = keyword.category_id;
+                    document.getElementById('keyword-weight').value = keyword.weight;
+                    document.getElementById('keyword-language').value = keyword.language;
+                    document.getElementById('keyword-psychology').checked = keyword.is_psychology;
+                    document.getElementById('keyword-psychology-level').value = keyword.psychology_level || 'medium';
+                    document.getElementById('keyword-active').checked = keyword.is_active;
+                    
+                    // Show/hide psychology level
+                    document.getElementById('psychology-level-group').style.display = keyword.is_psychology ? 'block' : 'none';
+                }
+            } else {
+                title.textContent = 'Add Keyword';
+                form.reset();
+                document.getElementById('keyword-id').value = '';
+                document.getElementById('psychology-level-group').style.display = 'none';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeKeywordForm() {
+            document.getElementById('keyword-modal').classList.remove('active');
+        }
+
+        function editKeyword(id) {
+            showKeywordForm(id);
+        }
+
+        async function deleteKeyword(id) {
+            if (!confirm('Are you sure you want to delete this keyword?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`api/admin-config.php?action=keyword&id=${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Keyword deleted successfully!');
+                    loadConfigData('keywords');
+                } else {
+                    alert('Failed to delete keyword: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error deleting keyword: ' + error.message);
+            }
+        }
+
+        // Psychology checkbox handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const psychologyCheckbox = document.getElementById('keyword-psychology');
+            if (psychologyCheckbox) {
+                psychologyCheckbox.addEventListener('change', function() {
+                    const levelGroup = document.getElementById('psychology-level-group');
+                    levelGroup.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+        });
+
+        // Template Management Functions
+        function showTemplateForm(id = null) {
+            const modal = document.getElementById('template-modal');
+            const form = document.getElementById('template-form');
+            const title = document.getElementById('template-form-title');
+            
+            // 清空链接容器
+            document.getElementById('template-links-container').innerHTML = '';
+            
+            if (id) {
+                const template = configData.templates.find(t => t.id == id);
+                if (template) {
+                    title.textContent = 'Edit Template';
+                    document.getElementById('template-id').value = template.id;
+                    document.getElementById('template-title').value = template.title;
+                    document.getElementById('template-category').value = template.category_id;
+                    document.getElementById('template-content-zh').value = template.content_zh;
+                    document.getElementById('template-content-en').value = template.content_en;
+                    document.getElementById('template-keywords').value = template.keywords || '';
+                    document.getElementById('template-priority').value = template.priority;
+                    document.getElementById('template-active').checked = template.is_active;
+                    
+                    // 加载链接
+                    if (template.links) {
+                        const links = typeof template.links === 'string' ? JSON.parse(template.links) : template.links;
+                        if (Array.isArray(links)) {
+                            links.forEach(link => {
+                                addTemplateLink(link.text, link.url);
+                            });
+                        }
+                    }
+                }
+            } else {
+                title.textContent = 'Add Template';
+                form.reset();
+                document.getElementById('template-id').value = '';
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        // 添加链接输入框
+        function addTemplateLink(text = '', url = '') {
+            const container = document.getElementById('template-links-container');
+            const linkDiv = document.createElement('div');
+            linkDiv.className = 'link-input-row';
+            linkDiv.innerHTML = `
+                <input type="text" class="link-text" placeholder="Button Text" value="${text}" style="flex: 1; margin-right: 8px;">
+                <input type="url" class="link-url" placeholder="https://..." value="${url}" style="flex: 2; margin-right: 8px;">
+                <button type="button" class="remove-link-btn" onclick="this.parentElement.remove()" style="background: #ef4444; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">✕</button>
+            `;
+            container.appendChild(linkDiv);
+        }
+        
+        // 获取所有链接
+        function getTemplateLinks() {
+            const container = document.getElementById('template-links-container');
+            const linkRows = container.querySelectorAll('.link-input-row');
+            const links = [];
+            
+            linkRows.forEach(row => {
+                const text = row.querySelector('.link-text').value.trim();
+                const url = row.querySelector('.link-url').value.trim();
+                if (text && url) {
+                    links.push({ text, url });
+                }
+            });
+            
+            return links.length > 0 ? links : null;
+        }
+
+        function closeTemplateForm() {
+            document.getElementById('template-modal').classList.remove('active');
+        }
+
+        function editTemplate(id) {
+            showTemplateForm(id);
+        }
+
+        async function deleteTemplate(id) {
+            if (!confirm('Are you sure you want to delete this template?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`api/admin-config.php?action=template&id=${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Template deleted successfully!');
+                    loadConfigData('templates');
+                } else {
+                    alert('Failed to delete template: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error deleting template: ' + error.message);
+            }
+        }
+
+        // Settings Management Functions
+        function showSettingForm(key = null) {
+            const modal = document.getElementById('setting-modal');
+            const form = document.getElementById('setting-form');
+            const title = document.getElementById('setting-form-title');
+            
+            if (key) {
+                const setting = configData.settings.find(s => s.setting_key === key);
+                if (setting) {
+                    title.textContent = 'Edit Setting';
+                    document.getElementById('setting-key').value = setting.setting_key;
+                    document.getElementById('setting-key').readOnly = true;
+                    document.getElementById('setting-value').value = setting.setting_value;
+                    document.getElementById('setting-description').value = setting.description || '';
+                    document.getElementById('setting-category').value = setting.category;
+                    document.getElementById('setting-active').checked = setting.is_active;
+                }
+            } else {
+                title.textContent = 'Add Setting';
+                form.reset();
+                document.getElementById('setting-key').readOnly = false;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeSettingForm() {
+            document.getElementById('setting-modal').classList.remove('active');
+        }
+
+        function editSetting(key) {
+            showSettingForm(key);
+        }
+
+        async function deleteSetting(key) {
+            if (!confirm('Are you sure you want to delete this setting?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`api/admin-config.php?action=setting&id=${key}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Setting deleted successfully!');
+                    loadConfigData('settings');
+                } else {
+                    alert('Failed to delete setting: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error deleting setting: ' + error.message);
+            }
+        }
+
+        // Data Cleanup Functions
+        function confirmCleanup(type, description) {
+            const modal = document.getElementById('cleanup-modal');
+            const target = document.getElementById('cleanup-target');
+            const confirmBtn = document.getElementById('confirm-cleanup-btn');
+            
+            target.textContent = description;
+            confirmBtn.onclick = () => executeCleanup(type);
+            modal.classList.add('active');
+        }
+
+        function closeCleanupModal() {
+            document.getElementById('cleanup-modal').classList.remove('active');
+        }
+        
+        // Clean Conversation History
+        async function cleanupConversationHistory() {
+            const days = document.getElementById('cleanup-history-days').value;
+            const statusDiv = document.getElementById('cleanup-status');
+            
+            // 先获取统计信息
+            try {
+                statusDiv.className = 'cleanup-status warning';
+                statusDiv.textContent = 'Checking conversation records...';
+                
+                const checkResponse = await fetch('api/admin-config.php?action=check_history_stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ days: parseInt(days) })
+                });
+                
+                const checkData = await checkResponse.json();
+                
+                if (checkData.success) {
+                    const totalRecords = checkData.total_records || 0;
+                    const oldRecords = checkData.old_records || 0;
+                    
+                    if (oldRecords === 0) {
+                        statusDiv.className = 'cleanup-status warning';
+                        statusDiv.innerHTML = `
+                            <strong>ℹ️ No records to clean</strong><br>
+                            Total records in database: ${totalRecords}<br>
+                            ${days == 0 ? 'Database is empty' : 'No records older than ' + days + ' days'}
+                        `;
+                        return;
+                    }
+                    
+                    const confirmMessage = days == 0 
+                        ? `⚠️ Are you sure you want to delete all ${oldRecords} conversation records?\n\nThis will clear the entire conversation history!\nThis action cannot be undone!`
+                        : `Are you sure you want to delete ${oldRecords} conversation records?\n(Older than ${days} days)\n\nThis action cannot be undone!`;
+                    
+                    if (!confirm(confirmMessage)) {
+                        statusDiv.textContent = '';
+                        return;
+                    }
+                }
+                
+                // 执行删除
+                statusDiv.className = 'cleanup-status warning';
+                statusDiv.textContent = 'Cleaning conversation history...';
+                
+                const response = await fetch('api/admin-config.php?action=cleanup_history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ days: parseInt(days) })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.className = 'cleanup-status success';
+                    const message = days == 0 
+                        ? `Successfully deleted all ${data.deleted_count || 0} conversation records`
+                        : `Successfully deleted ${data.deleted_count || 0} conversation records (older than ${days} days)`;
+                    statusDiv.innerHTML = `
+                        <strong>✅ Cleanup Complete!</strong><br>
+                        ${message}
+                    `;
+                    
+                    // 如果在 Conversation History 标签，刷新列表
+                    if (document.getElementById('config-history').classList.contains('active')) {
+                        loadHistory(0);
+                    }
+                } else {
+                    statusDiv.className = 'cleanup-status error';
+                    statusDiv.textContent = `❌ Cleanup failed: ${data.error || 'Unknown error'}`;
+                }
+            } catch (error) {
+                console.error('Failed to clean history:', error);
+                statusDiv.className = 'cleanup-status error';
+                statusDiv.textContent = `❌ Cleanup failed: ${error.message}`;
+            }
+        }
+
+        async function executeCleanup(type) {
+            const statusDiv = document.getElementById('cleanup-status');
+            
+            try {
+                statusDiv.className = 'cleanup-status warning';
+                statusDiv.textContent = 'Processing cleanup request...';
+                
+                const response = await fetch('api/admin-config.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'cleanup',
+                        type: type
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.className = 'cleanup-status success';
+                    statusDiv.textContent = data.message || 'Cleanup completed successfully!';
+                    
+                    // Refresh admin data if needed
+                    if (window.adminPanel) {
+                        setTimeout(() => window.adminPanel.refreshData(), 1000);
+                    }
+                } else {
+                    statusDiv.className = 'cleanup-status error';
+                    statusDiv.textContent = 'Cleanup failed: ' + (data.message || 'Unknown error');
+                }
+                
+                closeCleanupModal();
+                
+                // Hide status after 5 seconds
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+                
+            } catch (error) {
+                statusDiv.className = 'cleanup-status error';
+                statusDiv.textContent = 'Error: ' + error.message;
+                closeCleanupModal();
+            }
+        }
+
+        async function cleanupOldQuestions() {
+            const daysToKeep = document.getElementById('days-to-keep').value;
+            
+            if (!daysToKeep || daysToKeep < 1) {
+                alert('Please enter a valid number of days to keep.');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete all questions older than ${daysToKeep} days? This action cannot be undone.`)) {
+                return;
+            }
+
+            const statusDiv = document.getElementById('cleanup-status');
+            
+            try {
+                statusDiv.className = 'cleanup-status warning';
+                statusDiv.textContent = `Deleting questions older than ${daysToKeep} days...`;
+                
+                const response = await fetch('api/admin-config.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'cleanup',
+                        type: 'old_questions',
+                        days: parseInt(daysToKeep)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.className = 'cleanup-status success';
+                    statusDiv.textContent = data.message || `Old questions deleted successfully! ${data.deleted_count || 0} records removed.`;
+                    
+                    // Refresh admin data
+                    if (window.adminPanel) {
+                        setTimeout(() => window.adminPanel.refreshData(), 1000);
+                    }
+                } else {
+                    statusDiv.className = 'cleanup-status error';
+                    statusDiv.textContent = 'Cleanup failed: ' + (data.message || 'Unknown error');
+                }
+                
+                // Hide status after 5 seconds
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+                
+            } catch (error) {
+                statusDiv.className = 'cleanup-status error';
+                statusDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function optimizeDatabase() {
+            const statusDiv = document.getElementById('cleanup-status');
+            
+            try {
+                statusDiv.className = 'cleanup-status warning';
+                statusDiv.textContent = 'Optimizing database tables...';
+                
+                const response = await fetch('api/admin-config.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'cleanup',
+                        type: 'optimize_db'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.className = 'cleanup-status success';
+                    statusDiv.textContent = data.message || 'Database optimization completed successfully!';
+                } else {
+                    statusDiv.className = 'cleanup-status error';
+                    statusDiv.textContent = 'Optimization failed: ' + (data.message || 'Unknown error');
+                }
+                
+                // Hide status after 5 seconds
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+                
+            } catch (error) {
+                statusDiv.className = 'cleanup-status error';
+                statusDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Form submission handlers
+        document.addEventListener('DOMContentLoaded', () => {
+            // Keyword form submission
+            const keywordForm = document.getElementById('keyword-form');
+            if (keywordForm) {
+                keywordForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = {
+                        id: document.getElementById('keyword-id').value || null,
+                        keyword: document.getElementById('keyword-text').value,
+                        category_id: document.getElementById('keyword-category').value,
+                        weight: parseFloat(document.getElementById('keyword-weight').value),
+                        language: document.getElementById('keyword-language').value,
+                        is_psychology: document.getElementById('keyword-psychology').checked,
+                        psychology_level: document.getElementById('keyword-psychology-level').value,
+                        is_active: document.getElementById('keyword-active').checked
+                    };
+
+                    try {
+                        const response = await fetch('api/admin-config.php?action=keyword', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(formData)
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            alert('Keyword saved successfully!');
+                            closeKeywordForm();
+                            loadConfigData('keywords');
+                        } else {
+                            alert('Failed to save keyword: ' + (data.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        alert('Error saving keyword: ' + error.message);
+                    }
+                });
+            }
+
+            // Template form submission
+            const templateForm = document.getElementById('template-form');
+            if (templateForm) {
+                templateForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = {
+                        id: document.getElementById('template-id').value || null,
+                        category_id: document.getElementById('template-category').value,
+                        title: document.getElementById('template-title').value,
+                        content_zh: document.getElementById('template-content-zh').value,
+                        content_en: document.getElementById('template-content-en').value,
+                        keywords: document.getElementById('template-keywords').value,
+                        links: getTemplateLinks(), // 获取链接数据
+                        priority: parseInt(document.getElementById('template-priority').value),
+                        is_active: document.getElementById('template-active').checked
+                    };
+
+                    try {
+                        const response = await fetch('api/admin-config.php?action=template', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(formData)
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            alert('Template saved successfully!');
+                            closeTemplateForm();
+                            loadConfigData('templates');
+                        } else {
+                            alert('Failed to save template: ' + (data.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        alert('Error saving template: ' + error.message);
+                    }
+                });
+            }
+
+            // Setting form submission
+            const settingForm = document.getElementById('setting-form');
+            if (settingForm) {
+                settingForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = {
+                        setting_key: document.getElementById('setting-key').value,
+                        setting_value: document.getElementById('setting-value').value,
+                        description: document.getElementById('setting-description').value,
+                        category: document.getElementById('setting-category').value,
+                        is_active: document.getElementById('setting-active').checked
+                    };
+
+                    try {
+                        const response = await fetch('api/admin-config.php?action=setting', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(formData)
+                        });
+                        
+                        const data = await response.json();
+                        if (data.success) {
+                            alert('Setting saved successfully!');
+                            closeSettingForm();
+                            loadConfigData('settings');
+                        } else {
+                            alert('Failed to save setting: ' + (data.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        alert('Error saving setting: ' + error.message);
+                    }
+                });
+            }
+
+            // Preset Question form submission
+            const presetQuestionForm = document.getElementById('preset-question-form');
+            if (presetQuestionForm) {
+                presetQuestionForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const formData = new FormData();
+                    formData.append('action', 'preset_questions');
+                    formData.append('method', 'save');
+                    
+                    const data = {
+                        id: document.getElementById('preset-question-id').value || null,
+                        category: document.getElementById('preset-category').value,
+                        category_icon: document.getElementById('preset-category-icon').value,
+                        category_name_zh: document.getElementById('preset-category-name-zh').value,
+                        category_name_en: document.getElementById('preset-category-name-en').value,
+                        questions_zh: document.getElementById('preset-questions-zh').value,
+                        questions_en: document.getElementById('preset-questions-en').value,
+                        sort_order: document.getElementById('preset-sort-order').value,
+                        is_active: document.getElementById('preset-is-active').checked
+                    };
+                    
+                    formData.append('data[id]', data.id || '');
+                    formData.append('data[category]', data.category);
+                    formData.append('data[category_icon]', data.category_icon);
+                    formData.append('data[category_name_zh]', data.category_name_zh);
+                    formData.append('data[category_name_en]', data.category_name_en);
+                    formData.append('data[questions_zh]', data.questions_zh);
+                    formData.append('data[questions_en]', data.questions_en);
+                    formData.append('data[sort_order]', data.sort_order);
+                    if (data.is_active) {
+                        formData.append('data[is_active]', '1');
+                    }
+
+                    try {
+                        const response = await fetch('api/admin-config.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const result = await response.json();
+                        if (result.success) {
+                            alert('Preset question set saved successfully!');
+                            closePresetQuestionForm();
+                            loadConfigData('preset-questions');
+                        } else {
+                            alert('Failed to save preset question set: ' + (result.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        alert('Error saving preset question set: ' + error.message);
+                    }
+                });
+            }
+            
+            // Initialize admin panel
+            window.adminPanel = new AdminPanel();
+            
+            // Load initial configuration data
+            loadConfigData('categories');
+        });
+        
+        // AI Configuration Functions
+        async function loadAIConfig() {
+            try {
+                const response = await fetch('api/admin-config.php?action=ai_config');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const config = data.config;
+                    
+                    // Populate form fields with configuration
+                    document.getElementById('ai-provider').value = config.ai_provider || 'openai';
+                    document.getElementById('ai-api-endpoint').value = config.ai_api_endpoint || '';
+                    document.getElementById('ai-api-key').value = config.ai_api_key || '';
+                    document.getElementById('ai-model').value = config.ai_model || 'gpt-3.5-turbo';
+                    document.getElementById('ai-enabled').checked = config.ai_enabled === '1';
+                    
+                    document.getElementById('ai-max-tokens').value = config.ai_max_tokens || '1000';
+                    document.getElementById('ai-temperature').value = config.ai_temperature || '0.7';
+                    document.getElementById('ai-psychology-prompt-zh').value = config.ai_psychology_prompt_zh || '你是一位专业的心理健康咨询助手。请提供支持性、富有同理心的回复，同时始终强调寻求专业帮助的重要性。切勿进行诊断或提供医疗建议。';
+                    document.getElementById('ai-psychology-prompt-en').value = config.ai_psychology_prompt_en || 'You are a professional mental health counselor assistant. Provide supportive, empathetic responses while always emphasizing the importance of seeking professional help. Never diagnose or provide medical advice.';
+                    
+                    document.getElementById('ai-auto-handover').checked = config.ai_auto_handover === '1';
+                    document.getElementById('ai-handover-text-zh').value = config.ai_handover_text_zh || '转交AI助手';
+                    document.getElementById('ai-handover-text-en').value = config.ai_handover_text_en || 'Switch to AI Assistant';
+                    document.getElementById('ai-takeover-msg-zh').value = config.ai_takeover_msg_zh || 'AI助手已接管对话。我会为您提供更详细的帮助。';
+                    document.getElementById('ai-takeover-msg-en').value = config.ai_takeover_msg_en || 'AI Assistant has taken over the conversation. I\'ll provide you with more detailed assistance.';
+                    
+                    updateAIStatus(config.ai_enabled === '1');
+                }
+            } catch (error) {
+                console.error('Failed to load AI config:', error);
+            }
+        }
+        
+        async function saveAIConfig() {
+            try {
+                const config = {
+                    ai_provider: document.getElementById('ai-provider').value,
+                    ai_api_endpoint: document.getElementById('ai-api-endpoint').value,
+                    ai_api_key: document.getElementById('ai-api-key').value,
+                    ai_model: document.getElementById('ai-model').value,
+                    ai_enabled: document.getElementById('ai-enabled').checked ? '1' : '0',
+                    
+                    ai_max_tokens: document.getElementById('ai-max-tokens').value,
+                    ai_temperature: document.getElementById('ai-temperature').value,
+                    ai_psychology_prompt_zh: document.getElementById('ai-psychology-prompt-zh').value,
+                    ai_psychology_prompt_en: document.getElementById('ai-psychology-prompt-en').value,
+                    
+                    ai_auto_handover: document.getElementById('ai-auto-handover').checked ? '1' : '0',
+                    ai_handover_text_zh: document.getElementById('ai-handover-text-zh').value,
+                    ai_handover_text_en: document.getElementById('ai-handover-text-en').value,
+                    ai_takeover_msg_zh: document.getElementById('ai-takeover-msg-zh').value,
+                    ai_takeover_msg_en: document.getElementById('ai-takeover-msg-en').value
+                };
+                
+                const response = await fetch('api/admin-config.php?action=save_ai_config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ AI configuration saved successfully!');
+                    updateAIStatus(config.ai_enabled === '1');
+                } else {
+                    alert('❌ Failed to save AI configuration: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Failed to save AI config:', error);
+                alert('❌ Failed to save AI configuration: Network error');
+            }
+        }
+        
+        async function testAIConnection() {
+            try {
+                const provider = document.getElementById('ai-provider').value;
+                const endpoint = document.getElementById('ai-api-endpoint').value;
+                const apiKey = document.getElementById('ai-api-key').value;
+                const model = document.getElementById('ai-model').value;
+                
+                if (!endpoint || !apiKey) {
+                    alert('⚠️ Please fill in API endpoint and API key before testing');
+                    return;
+                }
+                
+                const response = await fetch('api/admin-config.php?action=test_ai_connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        provider: provider,
+                        endpoint: endpoint,
+                        api_key: apiKey,
+                        model: model
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ AI connection test successful!\n\nResponse: ' + data.test_response);
+                    updateAIConnectionStatus(true);
+                } else {
+                    alert('❌ AI connection test failed:\n\n' + (data.error || 'Unknown error'));
+                    updateAIConnectionStatus(false);
+                }
+            } catch (error) {
+                console.error('AI connection test failed:', error);
+                alert('❌ AI connection test failed: Network error');
+                updateAIConnectionStatus(false);
+            }
+        }
+        
+        function updateAIStatus(enabled) {
+            const statusElement = document.querySelector('#ai-status .status-item');
+            const indicator = statusElement.querySelector('.status-indicator');
+            const text = statusElement.querySelector('span:last-child');
+            
+            if (enabled) {
+                indicator.className = 'status-indicator status-online';
+                text.textContent = 'AI Integration: Enabled';
+            } else {
+                indicator.className = 'status-indicator status-offline';
+                text.textContent = 'AI Integration: Disabled';
+            }
+        }
+        
+        function updateAIConnectionStatus(connected) {
+            const statusElement = document.querySelector('#ai-status .status-item');
+            const indicator = statusElement.querySelector('.status-indicator');
+            const text = statusElement.querySelector('span:last-child');
+            
+            if (connected) {
+                indicator.className = 'status-indicator status-online';
+                text.textContent = 'AI Connection: Connected';
+            } else {
+                indicator.className = 'status-indicator status-offline';
+                text.textContent = 'AI Connection: Not Connected';
+            }
+        }
+
+        // Mail / SMTP Configuration Functions
+        async function loadMailConfig() {
+            try {
+                const res = await fetch('api/admin-config.php?action=mail_config');
+                const data = await res.json();
+                if (!data || !data.success) return;
+                const cfg = data.config || {};
+                (document.getElementById('mail-enabled') || {}).checked = cfg.mail_enabled === true || cfg.mail_enabled === '1';
+                (document.getElementById('mail-smtp-host') || {}).value = cfg.mail_smtp_host || '';
+                (document.getElementById('mail-smtp-port') || {}).value = cfg.mail_smtp_port || '587';
+                (document.getElementById('mail-smtp-secure') || {}).value = (cfg.mail_smtp_secure || 'tls');
+                (document.getElementById('mail-smtp-username') || {}).value = cfg.mail_smtp_username || '';
+                (document.getElementById('mail-smtp-password') || {}).value = '';
+                (document.getElementById('mail-from-email') || {}).value = cfg.mail_from_email || '';
+                (document.getElementById('mail-from-name') || {}).value = cfg.mail_from_name || '';
+                (document.getElementById('mail-alert-recipients') || {}).value = cfg.mail_alert_recipients || '';
+                (document.getElementById('mail-auth-method') || {}).value = cfg.mail_auth_method || 'auto';
+                (document.getElementById('mail-force-from-username') || {}).checked = (cfg.mail_force_from_username === '1');
+                const levels = (cfg.mail_alert_levels || 'medium,high,urgent').toLowerCase().split(',').map(s => s.trim());
+                document.querySelectorAll('#config-mail-config .mail-level').forEach(cb => {
+                    cb.checked = levels.includes(cb.value.toLowerCase());
+                });
+            } catch (e) {
+                console.error('Failed to load mail config', e);
+            }
+        }
+
+        async function saveMailConfig() {
+            try {
+                const levels = Array.from(document.querySelectorAll('#config-mail-config .mail-level'))
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value)
+                    .join(',');
+                const payload = {
+                    mail_enabled: (document.getElementById('mail-enabled') || { checked:false }).checked ? '1' : '0',
+                    mail_smtp_host: (document.getElementById('mail-smtp-host') || {}).value || '',
+                    mail_smtp_port: (document.getElementById('mail-smtp-port') || {}).value || '587',
+                    mail_smtp_secure: (document.getElementById('mail-smtp-secure') || {}).value || 'tls',
+                    mail_auth_method: (document.getElementById('mail-auth-method') || {}).value || 'auto',
+                    mail_smtp_username: (document.getElementById('mail-smtp-username') || {}).value || '',
+                    mail_smtp_password: (document.getElementById('mail-smtp-password') || {}).value || '',
+                    mail_from_email: (document.getElementById('mail-from-email') || {}).value || '',
+                    mail_from_name: (document.getElementById('mail-from-name') || {}).value || '',
+                    mail_force_from_username: (document.getElementById('mail-force-from-username') || {checked:false}).checked ? '1' : '0',
+                    mail_alert_recipients: (document.getElementById('mail-alert-recipients') || {}).value || '',
+                    mail_alert_levels: levels || 'urgent'
+                };
+                const res = await fetch('api/admin-config.php?action=save_mail_config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    alert('✅ Mail configuration saved');
+                    await loadMailConfig();
+                } else {
+                    alert('❌ Failed to save mail configuration');
+                }
+            } catch (e) {
+                console.error('Save mail config error', e);
+                alert('❌ Save failed: network error');
+            }
+        }
+
+        async function testMail() {
+            try {
+                let to = (document.getElementById('mail-alert-recipients') || {}).value || '';
+                let first = (to.split(',').map(s => s.trim()).filter(Boolean))[0] || '';
+                if (!first) {
+                    first = prompt('请输入测试收件地址');
+                    if (!first) return;
+                }
+                // 覆盖配置（密码为空则不传，沿用已保存密码）
+                const overrideCfg = {
+                    mail_enabled: '1',
+                    mail_smtp_host: (document.getElementById('mail-smtp-host') || {}).value || '',
+                    mail_smtp_port: (document.getElementById('mail-smtp-port') || {}).value || '587',
+                    mail_smtp_secure: (document.getElementById('mail-smtp-secure') || {}).value || 'tls',
+                    mail_auth_method: (document.getElementById('mail-auth-method') || {}).value || 'auto',
+                    mail_smtp_username: (document.getElementById('mail-smtp-username') || {}).value || '',
+                    mail_from_email: (document.getElementById('mail-from-email') || {}).value || '',
+                    mail_from_name: (document.getElementById('mail-from-name') || {}).value || '',
+                    mail_force_from_username: (document.getElementById('mail-force-from-username') || {checked:false}).checked ? '1' : '0'
+                };
+                const pwd = (document.getElementById('mail-smtp-password') || {}).value || '';
+                if (pwd) overrideCfg.mail_smtp_password = pwd;
+
+                const res = await fetch('api/admin-config.php?action=test_mail', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: first,
+                        subject: 'UON Q&A Test Email',
+                        html: '<p>This is a test email from <strong>UON Q&A System</strong>.</p>',
+                        text: 'This is a test email from UON Q&A System.',
+                        config: overrideCfg
+                    })
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    alert('✅ Test email sent');
+                } else {
+                    alert('❌ Test email failed: ' + (data.error || JSON.stringify(data)));
+                }
+            } catch (e) {
+                console.error('Test mail error', e);
+                alert('❌ Test email failed: network error');
+            }
+        }
+        
+        // Admin auth flow
+        const loginOverlay = document.createElement('div');
+        loginOverlay.id = 'admin-login';
+        loginOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:20000;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);';
+        loginOverlay.innerHTML = `
+            <div class="login-card-anim" style="background:#fff;border-radius:12px;padding:24px;width:360px;box-shadow:0 12px 30px rgba(0,0,0,0.2);">
+                <h3 style="margin:0 0 12px 0;color:#333;">Admin Login</h3>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input id="login-username" type="text" placeholder="Enter username" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input id="login-password" type="password" placeholder="Enter password" />
+                </div>
+                <button id="login-submit" class="control-btn" style="width:100%;">Login</button>
+                <div id="login-error" style="color:#dc3545;margin-top:8px;display:none;"></div>
+            </div>`;
+        document.body.appendChild(loginOverlay);
+        const logoutBtn = document.getElementById('admin-logout');
+        const loginBtn = () => document.getElementById('login-submit');
+        const loginError = () => document.getElementById('login-error');
+
+        async function getSession() {
+            try {
+                const res = await fetch('api/admin-config.php?action=session');
+                return await res.json();
+            } catch (e) { return { success:false, is_admin:false }; }
+        }
+
+        async function ensureAdmin() {
+            const status = await getSession();
+            if (status && status.success && status.is_admin) {
+                // Add exit animation to login card if exists
+                const card = loginOverlay.querySelector('.login-card-anim');
+                if (card) {
+                    card.classList.add('login-card-exit');
+                    setTimeout(() => { loginOverlay.style.display = 'none'; }, 240);
+                } else {
+                    loginOverlay.style.display = 'none';
+                }
+                if (logoutBtn) logoutBtn.style.display = 'inline-block';
+                initAdminPanelOnce();
+                showLoginSuccessToast();
+            } else {
+                loginOverlay.style.display = 'flex';
+                if (logoutBtn) logoutBtn.style.display = 'none';
+            }
+        }
+
+        async function doLogin() {
+            if (!loginError()) return;
+            loginError().style.display = 'none';
+            const payload = {
+                username: (document.getElementById('login-username')?.value || '').trim(),
+                password: (document.getElementById('login-password')?.value || '').trim()
+            };
+            try {
+                const res = await fetch('api/admin-config.php?action=login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await ensureAdmin();
+                } else {
+                    loginError().textContent = data.error || 'Login failed';
+                    loginError().style.display = 'block';
+                }
+            } catch (e) {
+                loginError().textContent = 'Network error';
+                loginError().style.display = 'block';
+            }
+        }
+
+        async function doLogout() {
+            try {
+                await fetch('api/admin-config.php?action=logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+            } finally {
+                // 强制刷新以丢弃任何可能的前端状态
+                window.location.reload();
+            }
+        }
+
+        function initAdminPanelOnce() {
+            if (!window.__admin_inited) {
+                window.__admin_inited = true;
+                if (typeof AdminPanel === 'function') {
+                    window.adminPanel = new AdminPanel();
+                }
+                if (typeof loadConfigData === 'function') {
+                    loadConfigData('categories');
+                }
+            }
+        }
+
+        loginOverlay.addEventListener('click', (e) => {
+            if (e.target === loginOverlay) {
+                // do nothing; prevent closing by backdrop
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target && e.target.id === 'login-submit') {
+                doLogin();
+            }
+        });
+        if (logoutBtn) logoutBtn.addEventListener('click', doLogout);
+
+        // Success toast element
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = '<span>✅ Login successful</span>';
+        document.body.appendChild(toast);
+
+        function showLoginSuccessToast() {
+            toast.classList.remove('hide');
+            toast.classList.add('show');
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => { toast.style.display = 'none'; toast.classList.remove('show','hide'); }, 220);
+            }, 1800);
+        }
+
+        ensureAdmin();
+
+        // Override showConfigTab to load AI config when needed
+        const originalShowConfigTab = showConfigTab;
+        showConfigTab = function(tabName) {
+            originalShowConfigTab(tabName);
+            if (tabName === 'ai-config') {
+                loadAIConfig();
+            } else if (tabName === 'mail-config') {
+                loadMailConfig();
+            }
+        };
+    </script>
+</body>
+</html> 
+</html> 

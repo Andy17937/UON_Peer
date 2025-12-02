@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="ASK Uon - Get instant answers to your campus questions">
+    <meta name="keywords" content="student, Q&A, campus, university, help, support, UON, Newcastle">
+    
+    <title>ASK Uon</title>
+    
+    <!-- 确保CSS加载时使用UTF-8 -->
+    <link rel="stylesheet" href="styles.css" charset="UTF-8">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="styles.css" as="style">
+    <link rel="preload" href="script.js" as="script">
+    
+    <!-- 设置页面编码和语言 -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <!-- PWA支持 -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- 社交媒体元数据 -->
+    <meta property="og:title" content="ASK Uon">
+    <meta property="og:description" content="Get instant answers to your campus questions">
+    <meta property="og:type" content="website">
+    
+    <!-- UON Logo 图标 -->
+    <link rel="icon" type="image/svg+xml" href="https://www.newcastle.edu.au/__data/assets/file/0011/661727/uon-logo-square.svg">
+    <link rel="apple-touch-icon" href="https://www.newcastle.edu.au/__data/assets/file/0011/661727/uon-logo-square.svg">
+</head>
+<body>
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 标题区域 -->
+        <header class="header">
+            <div class="logo">
+                <img src="https://www.newcastle.edu.au/__data/assets/file/0011/661727/uon-logo-square.svg" alt="UON Logo" class="logo-icon" style="width: 40px; height: 40px;">
+                <h1 class="title" id="main-title">ASK Uon</h1>
+            </div>
+            <div class="language-selector">
+                <button id="lang-toggle" class="lang-btn" title="Switch Language / 切换语言">
+                    <span id="lang-icon">🌐</span>
+                    <span id="lang-text">中文</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 欢迎信息 -->
+        <div class="welcome-section">
+            <p class="welcome-text" id="welcome-text">
+                Welcome to ASK Uon! Ask questions about dormitory, courses, grades, cafeteria, library, and get instant help.
+            </p>
+            <div class="feature-tags" id="feature-tags">
+                <!-- 预设问题按钮将动态加载 -->
+            </div>
+        </div>
+
+        <!-- 问答区域 -->
+        <div class="qa-section" id="qa-section" style="display: none;">
+            <!-- 学生ID信息条 -->
+            <div class="student-info-bar" id="student-info-bar">
+                <div class="student-info-content">
+                    <div class="student-avatar">
+                        <span class="avatar-icon">👤</span>
+                    </div>
+                    <div class="student-details">
+                        <span class="student-label" data-i18n="logged-in-as">Logged in as:</span>
+                        <span class="student-id-display" id="current-student-id">C123456</span>
+                    </div>
+                    <button class="change-id-btn" id="change-id-btn" title="Change Student ID">
+                        <span class="change-icon">✏️</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 聊天历史 -->
+            <div class="chat-history" id="chat-history">
+                <div class="chat-message system-message">
+                    <div class="message-content">
+                        <span class="system-icon">🤖</span>
+                        <span id="system-greeting">Hello! I'm here to help you with campus-related questions. What would you like to know?</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="input-section">
+                <form class="question-form" id="question-form">
+                    <!-- 问题输入 -->
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="question-input" 
+                            class="question-input" 
+                            placeholder="Type your question here..."
+                            autocomplete="off"
+                            maxlength="500"
+                            data-i18n-placeholder="input-placeholder"
+                            required
+                        >
+                        <button type="submit" class="submit-btn" id="submit-btn" disabled>
+                            <span class="btn-text" id="btn-text">Ask</span>
+                            <span class="btn-icon">📤</span>
+                        </button>
+                    </div>
+                    <div class="input-counter">
+                        <span id="char-counter">0/500</span>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 操作按钮区域 -->
+            <div class="action-buttons-section" id="action-buttons-section" style="display: none;">
+                <!-- 动态添加的操作按钮将显示在这里 -->
+            </div>
+        </div>
+
+        <!-- 状态指示器 -->
+        <div class="status-section">
+            <div class="connection-status" id="connection-status">
+                <span class="status-dot"></span>
+                <span class="status-text" id="status-text">Ready</span>
+            </div>
+            <div class="stats-info" id="stats-info">
+                <span id="question-count">Questions answered: 0</span>
+                <button class="clear-chat-btn" id="clear-chat-btn" title="Clear chat history / 清空聊天记录">
+                    <span class="clear-icon">🗑️</span>
+                    <span class="clear-text" id="clear-text" data-i18n="clear-chat">Clear</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loading-text">Processing your question...</div>
+        </div>
+    </div>
+
+    <!-- 错误提示 -->
+    <div class="error-toast" id="error-toast">
+        <div class="toast-content">
+            <span class="toast-icon">⚠️</span>
+            <span class="toast-message" id="toast-message"></span>
+            <button class="toast-close" id="toast-close">×</button>
+        </div>
+    </div>
+
+    <!-- 学生ID输入对话框 -->
+    <div class="modal-overlay student-id-modal" id="student-id-modal">
+        <div class="student-id-dialog">
+            <div class="dialog-header">
+                <div class="dialog-avatar">
+                    <img src="https://www.newcastle.edu.au/__data/assets/file/0011/661727/uon-logo-square.svg" alt="UON" class="avatar-img">
+                </div>
+                <h3 id="dialog-title" data-i18n="dialog-title">Welcome to ASK Uon</h3>
+                <p id="dialog-subtitle" data-i18n="dialog-subtitle">Let's get you started</p>
+            </div>
+            
+            <div class="dialog-body">
+                <div class="conversation-flow">
+                    <!-- 步骤1：欢迎信息 -->
+                    <div class="dialog-step" id="step-welcome">
+                        <div class="bot-message">
+                            <div class="bot-avatar">🤖</div>
+                            <div class="message-bubble">
+                                <p id="welcome-message" data-i18n="welcome-message">
+                                    Hi there! I'm your campus assistant. Before we start, I need to verify your student identity for better personalized help.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="dialog-actions">
+                            <button class="dialog-btn primary" id="start-verification" data-i18n="start-verification">
+                                <span class="btn-icon">👋</span>
+                                <span class="btn-text">Let's Start</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤2：学生ID输入 -->
+                    <div class="dialog-step" id="step-student-id" style="display: none;">
+                        <div class="bot-message">
+                            <div class="bot-avatar">🤖</div>
+                            <div class="message-bubble">
+                                <p id="id-request-message" data-i18n="id-request-message">
+                                                                            Perfect! Please enter your student ID. It should be in the format C followed by 7 digits (like C1234567).
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="user-input-area">
+                            <div class="input-label">
+                                <span data-i18n="your-student-id">Your Student ID</span>
+                                <span class="required">*</span>
+                            </div>
+                            <div class="dialog-student-id-wrapper">
+                                <span class="dialog-prefix">C</span>
+                                <input 
+                                    type="text" 
+                                    id="dialog-student-id" 
+                                    class="dialog-student-id-input" 
+                                                                                    placeholder="1234567"
+                                    autocomplete="off"
+                                                                                    maxlength="7"
+                                                                                    pattern="[0-9]{7}"
+                                    data-i18n-placeholder="student-id-placeholder"
+                                >
+                            </div>
+                            <div class="dialog-hint" id="dialog-hint">
+                                                                            <span data-i18n="dialog-hint">Enter your 7-digit student ID (numbers only)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="dialog-actions">
+                            <button class="dialog-btn secondary" id="back-to-welcome">
+                                <span class="btn-icon">←</span>
+                                <span class="btn-text" data-i18n="back">Back</span>
+                            </button>
+                            <button class="dialog-btn primary" id="continue-with-id" disabled>
+                                <span class="btn-text" data-i18n="continue">Continue</span>
+                                <span class="btn-icon">→</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 步骤3：确认信息 -->
+                    <div class="dialog-step" id="step-confirmation" style="display: none;">
+                        <div class="bot-message">
+                            <div class="bot-avatar">🤖</div>
+                            <div class="message-bubble">
+                                <p id="confirmation-message" data-i18n="confirmation-message">
+                                    Great! I've verified your student ID: <strong id="confirmed-student-id">C123456</strong>
+                                </p>
+                                <p id="ready-message" data-i18n="ready-message">
+                                    Now you're all set! Ask me anything about campus life, courses, facilities, or if you need support. I'm here to help! 🎓
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="dialog-actions">
+                            <button class="dialog-btn secondary" id="change-student-id">
+                                <span class="btn-icon">✏️</span>
+                                <span class="btn-text" data-i18n="change-id">Change ID</span>
+                            </button>
+                            <button class="dialog-btn primary" id="start-chatting">
+                                <span class="btn-text" data-i18n="start-chatting">Start Chatting</span>
+                                <span class="btn-icon">💬</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 心理健康提示模态框 -->
+    <div class="modal-overlay" id="psychology-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Mental Health Support</h3>
+                <button class="modal-close" id="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="support-icon">💚</div>
+                <p id="modal-message">
+                    We noticed you might need mental health support. Please remember that seeking help is a sign of strength, not weakness.
+                </p>
+                <div class="support-contacts">
+                    <div class="contact-item">
+                        <strong data-i18n="emergency-hotline">24/7 Crisis Hotline:</strong>
+                        <a href="tel:400-161-9995">400-161-9995</a>
+                    </div>
+                    <div class="contact-item">
+                        <strong data-i18n="campus-counseling">Campus Counseling:</strong>
+                        <a href="tel:010-12345678">010-12345678</a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="modal-understand" data-i18n="understand">I Understand</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 版权信息 -->
+    <footer class="footer">
+        <p>&copy; 2024 University of Newcastle, Australia. All rights reserved.</p>
+    </footer>
+
+    <!-- 确保JavaScript加载时使用UTF-8 -->
+    <script src="script.js" charset="UTF-8"></script>
+</body>
+</html> 

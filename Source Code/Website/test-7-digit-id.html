@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试7位学生ID功能</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .id-wrapper {
+            display: flex;
+            align-items: center;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background: #f9f9f9;
+        }
+        .id-prefix {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        #studentId {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+        .hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .hint.success {
+            color: #28a745;
+        }
+        .hint.warning {
+            color: #ffc107;
+        }
+        #testBtn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #testBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #e9ecef;
+            border-left: 4px solid #007bff;
+        }
+        .result.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .result.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 测试7位学生ID功能</h1>
+        
+        <div class="input-group">
+            <label for="studentId">学生ID:</label>
+            <div class="id-wrapper">
+                <span class="id-prefix">C</span>
+                <input type="text" 
+                       id="studentId" 
+                       placeholder="1234567" 
+                       maxlength="7"
+                       pattern="[0-9]{7}">
+            </div>
+            <div class="hint" id="hint">请输入7位数字学生ID（仅限数字）</div>
+        </div>
+
+        <div class="input-group">
+            <label for="question">测试问题:</label>
+            <input type="text" 
+                   id="question" 
+                   placeholder="请输入一个测试问题..."
+                   style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+        </div>
+
+        <button id="testBtn" disabled>提交测试</button>
+
+        <div class="result" id="result" style="display: none;">
+            <h3>测试结果:</h3>
+            <pre id="resultContent"></pre>
+        </div>
+    </div>
+
+    <script>
+        const studentIdInput = document.getElementById('studentId');
+        const questionInput = document.getElementById('question');
+        const hint = document.getElementById('hint');
+        const testBtn = document.getElementById('testBtn');
+        const result = document.getElementById('result');
+        const resultContent = document.getElementById('resultContent');
+
+        // 限制只能输入数字
+        studentIdInput.addEventListener('keypress', function(e) {
+            const char = String.fromCharCode(e.which);
+            if (!/[0-9]/.test(char)) {
+                e.preventDefault();
+            }
+        });
+
+        // 实时验证
+        studentIdInput.addEventListener('input', function(e) {
+            const value = e.target.value;
+            const cleanValue = value.replace(/[^0-9]/g, '');
+            const limitedValue = cleanValue.substring(0, 7);
+            
+            if (e.target.value !== limitedValue) {
+                e.target.value = limitedValue;
+            }
+            
+            updateHint(limitedValue);
+            updateButton();
+        });
+
+        questionInput.addEventListener('input', updateButton);
+
+        function updateHint(value) {
+            if (value.length === 0) {
+                hint.textContent = '请输入7位数字学生ID（仅限数字）';
+                hint.className = 'hint';
+            } else if (value.length < 7) {
+                const remaining = 7 - value.length;
+                hint.textContent = `还需要输入${remaining}位数字`;
+                hint.className = 'hint warning';
+            } else if (value.length === 7) {
+                hint.textContent = '✓ 学生ID格式正确';
+                hint.className = 'hint success';
+            }
+        }
+
+        function updateButton() {
+            const isValidId = /^[0-9]{7}$/.test(studentIdInput.value);
+            const hasQuestion = questionInput.value.trim().length > 0;
+            testBtn.disabled = !(isValidId && hasQuestion);
+        }
+
+        testBtn.addEventListener('click', async function() {
+            const studentId = studentIdInput.value;
+            const question = questionInput.value.trim();
+            
+            if (!studentId || !question) return;
+
+            result.style.display = 'block';
+            result.className = 'result';
+            resultContent.textContent = '正在测试...';
+
+            try {
+                const response = await fetch('/api/questions.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        student_id: studentId,
+                        language: 'zh'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    resultContent.textContent = JSON.stringify({
+                        success: true,
+                        message: '7位学生ID功能测试成功！',
+                        submitted_student_id: `C${studentId}`,
+                        question: question,
+                        response: data.response || '测试回复',
+                        timestamp: new Date().toLocaleString()
+                    }, null, 2);
+                } else {
+                    throw new Error(data.error || '未知错误');
+                }
+            } catch (error) {
+                result.className = 'result error';
+                resultContent.textContent = JSON.stringify({
+                    success: false,
+                    error: error.message,
+                    student_id: `C${studentId}`,
+                    question: question,
+                    timestamp: new Date().toLocaleString()
+                }, null, 2);
+            }
+        });
+    </script>
+</body>
+</html> 

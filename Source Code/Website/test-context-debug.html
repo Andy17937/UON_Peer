@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI上下文功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .debug-info {
+            background: #e9ecef;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI上下文功能测试</h1>
+        
+        <div class="test-section">
+            <h3>1. 浏览器指纹检测</h3>
+            <button onclick="testBrowserFingerprint()">检测浏览器指纹</button>
+            <div id="fingerprint-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. 用户会话检测</h3>
+            <button onclick="testUserSession()">检查用户会话</button>
+            <div id="session-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 对话历史检测</h3>
+            <button onclick="testConversationHistory()">查看对话历史</button>
+            <div id="history-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. AI上下文对话测试</h3>
+            <div>
+                <label>问题：</label>
+                <input type="text" id="test-question" placeholder="输入测试问题..." value="我叫小明">
+            </div>
+            <div>
+                <label>分类：</label>
+                <select id="test-category">
+                    <option value="general">一般</option>
+                    <option value="psychology">心理咨询</option>
+                    <option value="dormitory">宿舍</option>
+                    <option value="course">课程</option>
+                </select>
+            </div>
+            <button onclick="testAIChat()">发送AI问题</button>
+            <div id="ai-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. 连续对话测试</h3>
+            <p>点击下面的按钮按顺序测试上下文记忆：</p>
+            <button onclick="testSequence1()">1. 自我介绍</button>
+            <button onclick="testSequence2()">2. 询问记忆</button>
+            <button onclick="testSequence3()">3. 继续对话</button>
+            <div id="sequence-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>调试信息</h3>
+            <div id="debug-info" class="debug-info"></div>
+        </div>
+    </div>
+
+    <script>
+        let userFingerprint = null;
+        let sessionInfo = null;
+        
+        // 生成浏览器指纹
+        function getBrowserFingerprint() {
+            return {
+                screen_resolution: `${screen.width}x${screen.height}`,
+                screen_color_depth: screen.colorDepth,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                language: navigator.language,
+                languages: navigator.languages.join(','),
+                platform: navigator.platform,
+                cookie_enabled: navigator.cookieEnabled,
+                viewport: `${window.innerWidth}x${window.innerHeight}`,
+                user_agent: navigator.userAgent,
+                do_not_track: navigator.doNotTrack,
+                hardware_concurrency: navigator.hardwareConcurrency || 0,
+                device_memory: navigator.deviceMemory || 0,
+                max_touch_points: navigator.maxTouchPoints || 0,
+                connection_type: navigator.connection ? navigator.connection.effectiveType : 'unknown',
+                timestamp: Date.now()
+            };
+        }
+        
+        // 调用API
+        async function makeAPICall(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                throw new Error(`Network error: ${error.message}`);
+            }
+        }
+        
+        // 测试浏览器指纹
+        function testBrowserFingerprint() {
+            const result = document.getElementById('fingerprint-result');
+            const browserInfo = getBrowserFingerprint();
+            
+            result.className = 'result success';
+            result.style.display = 'block';
+            result.innerHTML = `
+                <h4>✅ 浏览器指纹生成成功</h4>
+                <div class="debug-info">${JSON.stringify(browserInfo, null, 2)}</div>
+            `;
+            
+            // 生成指纹哈希
+            const fingerprintString = JSON.stringify(browserInfo);
+            crypto.subtle.digest('SHA-256', new TextEncoder().encode(fingerprintString))
+                .then(hashBuffer => {
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    userFingerprint = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                    
+                    result.innerHTML += `<p><strong>指纹哈希:</strong> ${userFingerprint}</p>`;
+                    updateDebugInfo('指纹生成', { fingerprint: userFingerprint, browserInfo });
+                });
+        }
+        
+        // 测试用户会话
+        async function testUserSession() {
+            const result = document.getElementById('session-result');
+            
+            if (!userFingerprint) {
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML = '❌ 请先检测浏览器指纹';
+                return;
+            }
+            
+            try {
+                const browserInfo = getBrowserFingerprint();
+                const response = await makeAPICall('api/questions.php?action=ai_chat', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        question: '测试会话检测',
+                        category: 'general',
+                        language: 'zh',
+                        session_id: 'test_' + Date.now(),
+                        browser_info: browserInfo
+                    })
+                });
+                
+                sessionInfo = response;
+                result.className = 'result success';
+                result.style.display = 'block';
+                result.innerHTML = `
+                    <h4>✅ 用户会话检测成功</h4>
+                    <p><strong>用户指纹:</strong> ${response.user_fingerprint || '未返回'}</p>
+                    <p><strong>对话轮数:</strong> ${response.conversation_turns || 0}</p>
+                    <div class="debug-info">${JSON.stringify(response, null, 2)}</div>
+                `;
+                
+                updateDebugInfo('会话检测', response);
+            } catch (error) {
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML = `❌ 会话检测失败: ${error.message}`;
+            }
+        }
+        
+        // 测试对话历史
+        async function testConversationHistory() {
+            const result = document.getElementById('history-result');
+            
+            try {
+                // 直接查询数据库的对话历史（通过API）
+                const response = await makeAPICall('api/questions.php?action=get_context_debug', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        user_fingerprint: userFingerprint || sessionInfo?.user_fingerprint
+                    })
+                });
+                
+                if (response.success) {
+                    result.className = 'result success';
+                    result.style.display = 'block';
+                    result.innerHTML = `
+                        <h4>✅ 对话历史获取成功</h4>
+                        <p><strong>历史记录数量:</strong> ${response.history?.length || 0}</p>
+                        <div class="debug-info">${JSON.stringify(response.history, null, 2)}</div>
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.style.display = 'block';
+                    result.innerHTML = `❌ 获取历史失败: ${response.error}`;
+                }
+                
+                updateDebugInfo('对话历史', response);
+            } catch (error) {
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML = `❌ 历史检测失败: ${error.message}`;
+            }
+        }
+        
+        // 测试AI对话
+        async function testAIChat() {
+            const result = document.getElementById('ai-result');
+            const question = document.getElementById('test-question').value;
+            const category = document.getElementById('test-category').value;
+            
+            if (!question.trim()) {
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML = '❌ 请输入测试问题';
+                return;
+            }
+            
+            try {
+                const browserInfo = getBrowserFingerprint();
+                const response = await makeAPICall('api/questions.php?action=ai_chat', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        question: question,
+                        category: category,
+                        language: 'zh',
+                        session_id: 'test_' + Date.now(),
+                        browser_info: browserInfo
+                    })
+                });
+                
+                if (response.success) {
+                    result.className = 'result success';
+                    result.style.display = 'block';
+                    result.innerHTML = `
+                        <h4>✅ AI回复成功</h4>
+                        <p><strong>问题:</strong> ${question}</p>
+                        <p><strong>回复:</strong> ${response.response}</p>
+                        <p><strong>对话轮数:</strong> ${response.conversation_turns || 0}</p>
+                        <div class="debug-info">${JSON.stringify(response, null, 2)}</div>
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.style.display = 'block';
+                    result.innerHTML = `❌ AI回复失败: ${response.error}`;
+                }
+                
+                updateDebugInfo('AI对话', response);
+            } catch (error) {
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML = `❌ AI对话失败: ${error.message}`;
+            }
+        }
+        
+        // 连续对话测试
+        async function testSequence1() {
+            await testAIChatWithQuestion('我叫小明，今年20岁，来自北京');
+        }
+        
+        async function testSequence2() {
+            await testAIChatWithQuestion('你还记得我的名字吗？');
+        }
+        
+        async function testSequence3() {
+            await testAIChatWithQuestion('我来自哪里？');
+        }
+        
+        async function testAIChatWithQuestion(question) {
+            const result = document.getElementById('sequence-result');
+            
+            try {
+                const browserInfo = getBrowserFingerprint();
+                const response = await makeAPICall('api/questions.php?action=ai_chat', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        question: question,
+                        category: 'general',
+                        language: 'zh',
+                        session_id: 'test_sequence',
+                        browser_info: browserInfo
+                    })
+                });
+                
+                if (response.success) {
+                    const existingContent = result.innerHTML || '';
+                    result.className = 'result success';
+                    result.style.display = 'block';
+                    result.innerHTML = existingContent + `
+                        <div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <p><strong>问题:</strong> ${question}</p>
+                            <p><strong>回复:</strong> ${response.response}</p>
+                            <p><strong>对话轮数:</strong> ${response.conversation_turns || 0}</p>
+                        </div>
+                    `;
+                } else {
+                    result.className = 'result error';
+                    result.style.display = 'block';
+                    result.innerHTML += `❌ 测试失败: ${response.error}<br>`;
+                }
+                
+                updateDebugInfo('连续对话', { question, response });
+            } catch (error) {
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML += `❌ 连续对话测试失败: ${error.message}<br>`;
+            }
+        }
+        
+        // 更新调试信息
+        function updateDebugInfo(action, data) {
+            const debugDiv = document.getElementById('debug-info');
+            const timestamp = new Date().toLocaleTimeString();
+            debugDiv.innerHTML += `[${timestamp}] ${action}:\n${JSON.stringify(data, null, 2)}\n\n`;
+            debugDiv.scrollTop = debugDiv.scrollHeight;
+        }
+        
+        // 页面加载时自动检测指纹
+        window.addEventListener('load', () => {
+            testBrowserFingerprint();
+        });
+    </script>
+</body>
+</html> 

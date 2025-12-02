@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统测试 | 学生问答系统</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        
+        .test-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .test-button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .test-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            display: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-pending { background: #ffc107; }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← 返回主页</a>
+        
+        <h1>🔧 系统功能测试</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            这个页面可以帮助您测试学生问答系统的各项功能是否正常工作
+        </p>
+        
+        <!-- 数据库连接测试 -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-pending" id="db-status"></span>
+                1. 数据库连接测试
+            </div>
+            <p>测试数据库连接和基础查询功能</p>
+            <button class="test-button" onclick="testDatabase()">测试数据库连接</button>
+            <div class="test-result" id="db-result"></div>
+        </div>
+        
+        <!-- API 接口测试 -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-pending" id="api-status"></span>
+                2. API 接口测试
+            </div>
+            <p>测试问答 API 接口的基本功能</p>
+            <button class="test-button" onclick="testAPI()">测试基础 API</button>
+            <button class="test-button" onclick="testStats()">测试统计接口</button>
+            <div class="test-result" id="api-result"></div>
+        </div>
+        
+        <!-- 问答功能测试 -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-pending" id="keyword-status"></span>
+                3. 问答功能测试
+            </div>
+            <p>测试不同类型问题的问答回复功能</p>
+            <button class="test-button" onclick="testKeywords()">测试问答功能</button>
+            <div class="test-result" id="keyword-result"></div>
+        </div>
+        
+        <!-- 心理健康检测测试 -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-pending" id="psychology-status"></span>
+                4. 心理健康检测测试
+            </div>
+            <p>测试心理健康相关问题的检测和预警功能</p>
+            <button class="test-button" onclick="testPsychology()">测试心理健康检测</button>
+            <div class="test-result" id="psychology-result"></div>
+        </div>
+        
+        <!-- 多语言测试 -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-pending" id="language-status"></span>
+                5. 多语言支持测试
+            </div>
+            <p>测试中英文问题的处理和回复</p>
+            <button class="test-button" onclick="testLanguages()">测试多语言支持</button>
+            <div class="test-result" id="language-result"></div>
+        </div>
+        
+        <!-- 自定义测试 -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-pending" id="custom-status"></span>
+                6. 自定义问题测试
+            </div>
+            <p>输入自定义问题进行测试</p>
+            <input type="text" class="test-input" id="custom-question" placeholder="请输入测试问题..." maxlength="500">
+            <button class="test-button" onclick="testCustomQuestion()">发送测试问题</button>
+            <div class="test-result" id="custom-result"></div>
+        </div>
+        
+        <!-- 全面测试 -->
+        <div class="test-section" style="text-align: center;">
+            <button class="test-button" onclick="runAllTests()" style="background: #28a745; font-size: 1.1rem; padding: 15px 30px;">
+                🚀 运行全部测试
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // 测试工具类
+        class SystemTester {
+            constructor() {
+                this.baseURL = window.location.origin + window.location.pathname.replace('test.html', '');
+                this.results = {};
+            }
+            
+            async makeRequest(url, options = {}) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        ...options
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    throw new Error(`请求失败: ${error.message}`);
+                }
+            }
+            
+            showResult(elementId, content, type = 'info') {
+                const element = document.getElementById(elementId);
+                element.className = `test-result ${type}`;
+                element.textContent = content;
+                element.style.display = 'block';
+                
+                // 更新状态指示器
+                const statusId = elementId.replace('-result', '-status');
+                const statusElement = document.getElementById(statusId);
+                if (statusElement) {
+                    statusElement.className = `status-indicator status-${type === 'success' ? 'success' : 'error'}`;
+                }
+            }
+            
+            async testDatabase() {
+                this.showResult('db-result', '正在测试数据库连接...', 'loading');
+                
+                try {
+                    const result = await this.makeRequest('api/questions.php?action=test');
+                    
+                    if (result.success) {
+                        this.showResult('db-result', 
+                            `✅ 数据库连接成功！\n连接信息: ${result.message}\n字符集: ${result.charset || '未知'}`, 
+                            'success'
+                        );
+                        this.results.database = true;
+                    } else {
+                        this.showResult('db-result', 
+                            `❌ 数据库连接失败\n错误: ${result.error}`, 
+                            'error'
+                        );
+                        this.results.database = false;
+                    }
+                } catch (error) {
+                    this.showResult('db-result', 
+                        `❌ 数据库测试失败\n错误: ${error.message}`, 
+                        'error'
+                    );
+                    this.results.database = false;
+                }
+            }
+            
+            async testAPI() {
+                this.showResult('api-result', '正在测试 API 接口...', 'loading');
+                
+                try {
+                    // 测试问题提交
+                    const testQuestion = {
+                        question: "这是一个测试问题",
+                        language: "zh"
+                    };
+                    
+                    const result = await this.makeRequest('api/questions.php', {
+                        method: 'POST',
+                        body: JSON.stringify(testQuestion)
+                    });
+                    
+                    if (result.success) {
+                        this.showResult('api-result', 
+                            `✅ API 接口正常！\n问题ID: ${result.question_id}\n回复: ${result.response}\n语言: ${result.language}`, 
+                            'success'
+                        );
+                        this.results.api = true;
+                    } else {
+                        this.showResult('api-result', 
+                            `❌ API 接口异常\n错误: ${result.error}`, 
+                            'error'
+                        );
+                        this.results.api = false;
+                    }
+                } catch (error) {
+                    this.showResult('api-result', 
+                        `❌ API 测试失败\n错误: ${error.message}`, 
+                        'error'
+                    );
+                    this.results.api = false;
+                }
+            }
+            
+            async testStats() {
+                try {
+                    const stats = await this.makeRequest('api/questions.php?action=stats');
+                    
+                    if (stats.success) {
+                        const current = document.getElementById('api-result');
+                        current.textContent += `\n\n📊 统计数据获取成功:\n总问题数: ${stats.stats.total_questions}\n今日问题: ${stats.stats.today_questions}\n心理健康相关: ${stats.stats.psychology_questions}\n独立用户: ${stats.stats.unique_sessions}`;
+                    }
+                } catch (error) {
+                    console.warn('统计接口测试失败:', error);
+                }
+            }
+            
+            async testKeywords() {
+                this.showResult('keyword-result', '正在测试问答功能...', 'loading');
+                
+                const testCases = [
+                    { question: "宿舍几点关门？", category: "宿舍管理" },
+                    { question: "图书馆开放时间", category: "图书馆" },
+                    { question: "怎么查成绩？", category: "成绩查询" },
+                    { question: "食堂今天吃什么？", category: "食堂信息" },
+                    { question: "What time does the library open?", category: "Library" }
+                ];
+                
+                try {
+                    let results = "问答功能测试结果:\n";
+                    let successCount = 0;
+                    
+                    for (const testCase of testCases) {
+                        try {
+                            const result = await this.makeRequest('api/questions.php', {
+                                method: 'POST',
+                                body: JSON.stringify(testCase)
+                            });
+                            
+                                            if (result.success && result.response) {
+                    results += `\n✅ "${testCase.question}"\n   回复: ${result.response.substring(0, 50)}...\n   分类: ${result.category}`;
+                    successCount++;
+                } else {
+                    results += `\n⚠️ "${testCase.question}"\n   处理失败`;
+                }
+                        } catch (error) {
+                            results += `\n❌ "${testCase.question}"\n   测试失败: ${error.message}`;
+                        }
+                    }
+                    
+                    results += `\n\n总结: ${successCount}/${testCases.length} 个测试用例通过`;
+                    
+                    this.showResult('keyword-result', results, successCount >= testCases.length * 0.8 ? 'success' : 'error');
+                    this.results.keywords = successCount >= testCases.length * 0.8;
+                    
+                } catch (error) {
+                    this.showResult('keyword-result', 
+                        `❌ 问答功能测试失败\n错误: ${error.message}`, 
+                        'error'
+                    );
+                    this.results.keywords = false;
+                }
+            }
+            
+            async testPsychology() {
+                this.showResult('psychology-result', '正在测试心理健康检测...', 'loading');
+                
+                const psychologyQuestions = [
+                    "我感觉很抑郁",
+                    "最近总是很焦虑",
+                    "I feel very depressed",
+                    "我需要心理咨询",
+                    "睡不着觉很痛苦"
+                ];
+                
+                try {
+                    let results = "心理健康检测测试结果:\n";
+                    let detectedCount = 0;
+                    
+                    for (const question of psychologyQuestions) {
+                        try {
+                            const result = await this.makeRequest('api/questions.php', {
+                                method: 'POST',
+                                body: JSON.stringify({ question, language: 'zh' })
+                            });
+                            
+                            if (result.success && result.is_psychology_related) {
+                                results += `\n✅ "${question}" - 正确检测为心理健康相关`;
+                                detectedCount++;
+                            } else {
+                                results += `\n❌ "${question}" - 未检测为心理健康相关`;
+                            }
+                        } catch (error) {
+                            results += `\n❌ "${question}" - 测试失败: ${error.message}`;
+                        }
+                    }
+                    
+                    results += `\n\n检测准确率: ${detectedCount}/${psychologyQuestions.length}`;
+                    
+                    this.showResult('psychology-result', results, detectedCount >= psychologyQuestions.length * 0.8 ? 'success' : 'error');
+                    this.results.psychology = detectedCount >= psychologyQuestions.length * 0.8;
+                    
+                } catch (error) {
+                    this.showResult('psychology-result', 
+                        `❌ 心理健康检测测试失败\n错误: ${error.message}`, 
+                        'error'
+                    );
+                    this.results.psychology = false;
+                }
+            }
+            
+            async testLanguages() {
+                this.showResult('language-result', '正在测试多语言支持...', 'loading');
+                
+                const languageTests = [
+                    { question: "图书馆几点开门？", expectedLang: 'zh' },
+                    { question: "What time does the library open?", expectedLang: 'en' },
+                    { question: "宿舍管理", expectedLang: 'zh' },
+                    { question: "dormitory hours", expectedLang: 'en' }
+                ];
+                
+                try {
+                    let results = "多语言支持测试结果:\n";
+                    let correctCount = 0;
+                    
+                    for (const test of languageTests) {
+                        try {
+                            const result = await this.makeRequest('api/questions.php', {
+                                method: 'POST',
+                                body: JSON.stringify({ question: test.question })
+                            });
+                            
+                            if (result.success && result.language === test.expectedLang) {
+                                results += `\n✅ "${test.question}" - 语言检测正确 (${result.language})`;
+                                correctCount++;
+                            } else {
+                                results += `\n❌ "${test.question}" - 语言检测错误\n   期望: ${test.expectedLang}, 实际: ${result.language || '未知'}`;
+                            }
+                        } catch (error) {
+                            results += `\n❌ "${test.question}" - 测试失败: ${error.message}`;
+                        }
+                    }
+                    
+                    results += `\n\n语言检测准确率: ${correctCount}/${languageTests.length}`;
+                    
+                    this.showResult('language-result', results, correctCount >= languageTests.length * 0.75 ? 'success' : 'error');
+                    this.results.languages = correctCount >= languageTests.length * 0.75;
+                    
+                } catch (error) {
+                    this.showResult('language-result', 
+                        `❌ 多语言测试失败\n错误: ${error.message}`, 
+                        'error'
+                    );
+                    this.results.languages = false;
+                }
+            }
+            
+            async testCustomQuestion() {
+                const question = document.getElementById('custom-question').value.trim();
+                
+                if (!question) {
+                    this.showResult('custom-result', '请输入测试问题', 'error');
+                    return;
+                }
+                
+                this.showResult('custom-result', '正在处理自定义问题...', 'loading');
+                
+                try {
+                    const result = await this.makeRequest('api/questions.php', {
+                        method: 'POST',
+                        body: JSON.stringify({ question })
+                    });
+                    
+                    if (result.success) {
+                        const resultText = `✅ 问题处理成功！\n\n问题: ${question}\n回复: ${result.response}\n语言: ${result.language}\n分类: ${result.category}\n心理健康相关: ${result.is_psychology_related ? '是' : '否'}\n问题ID: ${result.question_id}`;
+                        
+                        this.showResult('custom-result', resultText, 'success');
+                    } else {
+                        this.showResult('custom-result', 
+                            `❌ 问题处理失败\n错误: ${result.error}`, 
+                            'error'
+                        );
+                    }
+                } catch (error) {
+                    this.showResult('custom-result', 
+                        `❌ 自定义问题测试失败\n错误: ${error.message}`, 
+                        'error'
+                    );
+                }
+            }
+            
+            async runAllTests() {
+                console.log('开始运行全部测试...');
+                
+                // 重置结果
+                this.results = {};
+                
+                // 依次运行所有测试
+                await this.testDatabase();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                await this.testAPI();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                await this.testKeywords();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                await this.testPsychology();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                await this.testLanguages();
+                
+                // 显示总结
+                this.showTestSummary();
+            }
+            
+            showTestSummary() {
+                const passedTests = Object.values(this.results).filter(result => result === true).length;
+                const totalTests = Object.keys(this.results).length;
+                
+                let summaryText = `\n\n🎯 测试完成总结:\n通过测试: ${passedTests}/${totalTests}\n`;
+                
+                for (const [test, passed] of Object.entries(this.results)) {
+                    summaryText += `${passed ? '✅' : '❌'} ${test}\n`;
+                }
+                
+                if (passedTests === totalTests) {
+                    summaryText += '\n🎉 所有测试都通过了！系统运行正常。';
+                } else if (passedTests >= totalTests * 0.8) {
+                    summaryText += '\n⚠️ 大部分测试通过，系统基本正常，但有些功能需要检查。';
+                } else {
+                    summaryText += '\n❌ 多个测试失败，请检查系统配置和数据库连接。';
+                }
+                
+                // 显示在最后一个测试结果中
+                const lastResult = document.querySelector('.test-result[style*="block"]:last-of-type') || 
+                                 document.getElementById('language-result');
+                if (lastResult) {
+                    lastResult.textContent += summaryText;
+                }
+            }
+        }
+        
+        // 创建全局测试器实例
+        const tester = new SystemTester();
+        
+        // 全局测试函数
+        function testDatabase() { tester.testDatabase(); }
+        function testAPI() { tester.testAPI(); }
+        function testStats() { tester.testStats(); }
+        function testKeywords() { tester.testKeywords(); }
+        function testPsychology() { tester.testPsychology(); }
+        function testLanguages() { tester.testLanguages(); }
+        function testCustomQuestion() { tester.testCustomQuestion(); }
+        function runAllTests() { tester.runAllTests(); }
+        
+        // 自定义问题输入框回车事件
+        document.getElementById('custom-question').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                testCustomQuestion();
+            }
+        });
+        
+        // 页面加载完成后自动测试数据库连接
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('系统测试页面加载完成');
+            // 自动进行数据库连接测试
+            setTimeout(() => {
+                testDatabase();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

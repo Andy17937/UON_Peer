@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Save Welcome Text</title>
+</head>
+<body>
+    <h1>测试保存欢迎文字</h1>
+    
+    <div>
+        <label>中文文字:</label><br>
+        <textarea id="zh" rows="3" cols="50">测试中文欢迎文字</textarea>
+    </div>
+    
+    <div>
+        <label>英文文字:</label><br>
+        <textarea id="en" rows="3" cols="50">Test English welcome text</textarea>
+    </div>
+    
+    <button onclick="testSave()">保存</button>
+    
+    <h2>结果:</h2>
+    <pre id="result"></pre>
+    
+    <script>
+        async function testSave() {
+            const zh = document.getElementById('zh').value;
+            const en = document.getElementById('en').value;
+            const resultEl = document.getElementById('result');
+            
+            resultEl.textContent = '正在保存...';
+            
+            try {
+                // Test 1: Save Chinese text
+                const formDataZh = new FormData();
+                formDataZh.append('action', 'system_settings');
+                formDataZh.append('method', 'save');
+                formDataZh.append('data[setting_key]', 'welcome_text_zh');
+                formDataZh.append('data[setting_value]', zh);
+                formDataZh.append('data[description]', '首页欢迎文字（中文）');
+                formDataZh.append('data[category]', 'general');
+                formDataZh.append('data[is_active]', 1);
+                
+                console.log('Sending request...');
+                const responseZh = await fetch('api/admin-config.php?action=system_settings', {
+                    method: 'POST',
+                    body: formDataZh
+                });
+                
+                console.log('Response status:', responseZh.status);
+                console.log('Response headers:', [...responseZh.headers.entries()]);
+                
+                const textZh = await responseZh.text();
+                console.log('Response text:', textZh);
+                
+                let result = {
+                    status: responseZh.status,
+                    statusText: responseZh.statusText,
+                    responseText: textZh
+                };
+                
+                try {
+                    result.json = JSON.parse(textZh);
+                } catch (e) {
+                    result.parseError = e.message;
+                }
+                
+                resultEl.textContent = JSON.stringify(result, null, 2);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultEl.textContent = 'Error: ' + error.message + '\n\n' + error.stack;
+            }
+        }
+    </script>
+</body>
+</html>
+

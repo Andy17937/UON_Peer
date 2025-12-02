@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试 Preset Questions 保存</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .form-group { margin: 15px 0; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        textarea { min-height: 100px; }
+        button { padding: 10px 20px; background: #4299e1; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #3182ce; }
+        .result { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🧪 测试 Preset Questions 保存功能</h1>
+    
+    <div class="form-group">
+        <label>ID (留空创建新记录，填写ID更新现有记录):</label>
+        <input type="text" id="id" value="20" placeholder="例如: 20">
+    </div>
+    
+    <div class="form-group">
+        <label>Category:</label>
+        <input type="text" id="category" value="courses" required>
+    </div>
+    
+    <div class="form-group">
+        <label>Category Icon:</label>
+        <input type="text" id="category_icon" value="📚">
+    </div>
+    
+    <div class="form-group">
+        <label>Category Name (中文):</label>
+        <input type="text" id="category_name_zh" value="课程测试" required>
+    </div>
+    
+    <div class="form-group">
+        <label>Category Name (English):</label>
+        <input type="text" id="category_name_en" value="Courses Test" required>
+    </div>
+    
+    <div class="form-group">
+        <label>Questions (中文) - 每行一个问题:</label>
+        <textarea id="questions_zh">如何查看课程表？
+如何申请调课？
+期末考试时间安排
+这是测试新增的问题</textarea>
+    </div>
+    
+    <div class="form-group">
+        <label>Questions (English) - 每行一个问题:</label>
+        <textarea id="questions_en">How to check course schedules?
+How to apply for course changes?
+Final exam schedule
+This is a test new question</textarea>
+    </div>
+    
+    <div class="form-group">
+        <label>Sort Order:</label>
+        <input type="number" id="sort_order" value="2">
+    </div>
+    
+    <div class="form-group">
+        <label>
+            <input type="checkbox" id="is_active" checked> Active
+        </label>
+    </div>
+    
+    <button onclick="testSave()">💾 保存</button>
+    <button onclick="checkDatabase()">🔍 查看数据库</button>
+    
+    <h2>结果:</h2>
+    <div id="result"></div>
+    
+    <script>
+        async function testSave() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>正在保存...</p>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'preset_questions');
+                formData.append('method', 'save');
+                
+                const id = document.getElementById('id').value;
+                if (id) formData.append('data[id]', id);
+                
+                formData.append('data[category]', document.getElementById('category').value);
+                formData.append('data[category_icon]', document.getElementById('category_icon').value);
+                formData.append('data[category_name_zh]', document.getElementById('category_name_zh').value);
+                formData.append('data[category_name_en]', document.getElementById('category_name_en').value);
+                formData.append('data[questions_zh]', document.getElementById('questions_zh').value);
+                formData.append('data[questions_en]', document.getElementById('questions_en').value);
+                formData.append('data[sort_order]', document.getElementById('sort_order').value);
+                
+                if (document.getElementById('is_active').checked) {
+                    formData.append('data[is_active]', '1');
+                }
+                
+                console.log('发送数据...');
+                const response = await fetch('/api/admin-config.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('响应状态:', response.status);
+                const text = await response.text();
+                console.log('响应内容:', text);
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ 解析错误</h3>
+                            <p>无法解析 JSON 响应</p>
+                            <pre>${text}</pre>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ 保存成功！</h3>
+                            <p><strong>消息:</strong> ${data.message || 'Success'}</p>
+                            <p><strong>ID:</strong> ${data.id || id || 'N/A'}</p>
+                            <p>现在可以点击 "查看数据库" 验证数据是否真的保存了。</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ 保存失败</h3>
+                            <p><strong>错误:</strong> ${data.error || data.message || 'Unknown error'}</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('错误:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ 请求失败</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function checkDatabase() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>正在查询数据库...</p>';
+            
+            try {
+                const id = document.getElementById('id').value || '20';
+                const response = await fetch(`/api/admin-config.php?action=preset-questions`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const record = data.data.find(r => r.id == id);
+                    
+                    if (record) {
+                        const questionsZh = JSON.parse(record.questions_zh || '[]');
+                        const questionsEn = JSON.parse(record.questions_en || '[]');
+                        
+                        resultDiv.innerHTML = `
+                            <div class="result">
+                                <h3>📊 数据库记录 (ID: ${record.id})</h3>
+                                <p><strong>Category:</strong> ${record.category}</p>
+                                <p><strong>名称:</strong> ${record.category_name_zh} / ${record.category_name_en}</p>
+                                <p><strong>图标:</strong> ${record.category_icon}</p>
+                                <p><strong>排序:</strong> ${record.sort_order}</p>
+                                <p><strong>状态:</strong> ${record.is_active ? '✅ Active' : '❌ Inactive'}</p>
+                                <p><strong>更新时间:</strong> ${record.updated_at}</p>
+                                <p><strong>中文问题 (${questionsZh.length}):</strong></p>
+                                <ol>${questionsZh.map(q => `<li>${q}</li>`).join('')}</ol>
+                                <p><strong>英文问题 (${questionsEn.length}):</strong></p>
+                                <ol>${questionsEn.map(q => `<li>${q}</li>`).join('')}</ol>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="result error">
+                                <h3>❌ 未找到记录</h3>
+                                <p>ID ${id} 的记录不存在</p>
+                            </div>
+                        `;
+                    }
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ 查询失败</h3>
+                            <p>${data.error || 'Unknown error'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ 查询失败</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 页面加载时自动查看当前数据库状态
+        window.onload = checkDatabase;
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI上下文记忆功能测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .chat-area {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 300px;
+            margin-bottom: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .ai-message {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .test-suggestions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .test-suggestions h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        
+        .test-suggestions ul {
+            margin-bottom: 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI上下文记忆功能测试</h1>
+        
+        <div class="info">
+            <strong>测试说明：</strong> 此页面用于测试AI是否能记住对话历史。每次对话都会基于用户的浏览器指纹（IP+UA等）来识别身份，AI会记住之前的对话内容。
+        </div>
+        
+        <div class="test-suggestions">
+            <h3>建议测试场景：</h3>
+            <ul>
+                <li>介绍自己的姓名，然后询问AI是否记得</li>
+                <li>谈论一个话题，然后在后续对话中引用</li>
+                <li>设定一个角色扮演场景，检查AI是否保持角色</li>
+                <li>刷新页面后继续对话，测试持久化记忆</li>
+            </ul>
+        </div>
+        
+        <div class="chat-area" id="chatArea">
+            <div class="message ai-message">
+                你好！我是你的AI助手，我会记住我们的对话历史。请随便和我聊天，测试我的记忆功能吧！
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="输入消息测试上下文记忆..." maxlength="500">
+            <button onclick="sendMessage()" id="sendButton">发送</button>
+        </div>
+        
+        <div class="input-area">
+            <button onclick="clearHistory()" style="background: #dc3545;">清除对话历史</button>
+            <button onclick="showFingerprint()" style="background: #6c757d;">显示用户指纹</button>
+        </div>
+    </div>
+
+    <script>
+        const chatArea = document.getElementById('chatArea');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        
+        // 获取浏览器指纹
+        function getBrowserFingerprint() {
+            return {
+                screen_resolution: `${screen.width}x${screen.height}`,
+                screen_color_depth: screen.colorDepth,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                language: navigator.language,
+                languages: navigator.languages.join(','),
+                platform: navigator.platform,
+                cookie_enabled: navigator.cookieEnabled,
+                viewport: `${window.innerWidth}x${window.innerHeight}`,
+                user_agent: navigator.userAgent,
+                do_not_track: navigator.doNotTrack,
+                hardware_concurrency: navigator.hardwareConcurrency || 0,
+                device_memory: navigator.deviceMemory || 0,
+                max_touch_points: navigator.maxTouchPoints || 0,
+                connection_type: navigator.connection ? navigator.connection.effectiveType : 'unknown',
+                timestamp: Date.now()
+            };
+        }
+        
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            messageDiv.textContent = content;
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            sendButton.disabled = true;
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            // 显示思考中...
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'message ai-message';
+            thinkingDiv.textContent = '思考中...';
+            thinkingDiv.id = 'thinking';
+            chatArea.appendChild(thinkingDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            try {
+                const response = await fetch('api/questions.php?action=ai_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question: message,
+                        category: 'general',
+                        language: 'zh',
+                        browser_info: getBrowserFingerprint()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // 移除思考中提示
+                document.getElementById('thinking')?.remove();
+                
+                if (data.success) {
+                    addMessage(data.response);
+                    
+                    // 显示调试信息
+                    if (data.conversation_turns !== undefined) {
+                        const debugInfo = `[调试] 对话轮数: ${data.conversation_turns}, 指纹: ${data.user_fingerprint?.substring(0, 8)}...`;
+                        const debugDiv = document.createElement('div');
+                        debugDiv.style.fontSize = '0.8em';
+                        debugDiv.style.color = '#666';
+                        debugDiv.style.fontStyle = 'italic';
+                        debugDiv.textContent = debugInfo;
+                        chatArea.appendChild(debugDiv);
+                    }
+                } else {
+                    addMessage('抱歉，发生了错误：' + (data.error || '未知错误'));
+                }
+            } catch (error) {
+                document.getElementById('thinking')?.remove();
+                addMessage('网络错误，请稍后重试');
+                console.error('发送消息失败:', error);
+            }
+            
+            sendButton.disabled = false;
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function clearHistory() {
+            if (confirm('确定要清除对话历史吗？这将清除AI的记忆。')) {
+                chatArea.innerHTML = '<div class="message ai-message">对话历史已清除，我重新开始记忆。</div>';
+                // 这里可以添加清除服务器端历史的API调用
+            }
+        }
+        
+        function showFingerprint() {
+            const fingerprint = getBrowserFingerprint();
+            const fingerprintStr = JSON.stringify(fingerprint, null, 2);
+            
+            // 创建简单的hash
+            const hash = btoa(fingerprint.user_agent + fingerprint.screen_resolution + fingerprint.timezone).substring(0, 16);
+            
+            alert(`用户指纹哈希: ${hash}\n\n完整指纹信息:\n${fingerprintStr}`);
+        }
+        
+        // 回车发送
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 页面加载完成后聚焦输入框
+        window.addEventListener('load', function() {
+            messageInput.focus();
+        });
+    </script>
+</body>
+</html> 

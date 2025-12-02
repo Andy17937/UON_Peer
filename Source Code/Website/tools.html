@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统工具 - ASK Uon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        .header img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .tool-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .tool-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .tool-title {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .tool-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .tool-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .tool-badge.warning {
+            background: #f59e0b;
+        }
+        .tool-badge.info {
+            background: #3b82f6;
+        }
+        .back-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        .section-title {
+            color: white;
+            font-size: 1.8rem;
+            margin: 40px 0 20px 0;
+            text-align: center;
+        }
+        .info-box {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .info-box h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+        .info-box li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            line-height: 1.6;
+        }
+        .info-box li:last-child {
+            border-bottom: none;
+        }
+        .info-box li::before {
+            content: '✓';
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://www.newcastle.edu.au/__data/assets/file/0011/661727/uon-logo-square.svg" alt="UON Logo">
+            <h1>🛠️ ASK Uon 系统工具</h1>
+            <p>诊断和修复工具集</p>
+        </div>
+
+        <h2 class="section-title">🚨 快速修复工具</h2>
+        
+        <div class="tools-grid">
+            <a href="fix.html" class="tool-card">
+                <div class="tool-icon">🚀</div>
+                <div class="tool-title">一键修复</div>
+                <div class="tool-description">
+                    自动清除缓存、本地存储和Service Worker，解决大部分常见问题。推荐首选。
+                </div>
+                <span class="tool-badge">推荐</span>
+            </a>
+
+            <a href="index.html?_t=<?php echo time(); ?>" class="tool-card">
+                <div class="tool-icon">🔄</div>
+                <div class="tool-title">强制刷新</div>
+                <div class="tool-description">
+                    跳过缓存，强制重新加载主页。这会加载最新版本的所有文件。
+                </div>
+                <span class="tool-badge info">快速</span>
+            </a>
+
+            <a href="javascript:void(0)" onclick="clearAndReload()" class="tool-card">
+                <div class="tool-icon">🗑️</div>
+                <div class="tool-title">清除缓存</div>
+                <div class="tool-description">
+                    仅清除本地存储和缓存，不离开当前页面。适合快速重置。
+                </div>
+                <span class="tool-badge warning">谨慎</span>
+            </a>
+        </div>
+
+        <h2 class="section-title">🔍 诊断工具</h2>
+        
+        <div class="tools-grid">
+            <a href="diagnose.html" class="tool-card">
+                <div class="tool-icon">📊</div>
+                <div class="tool-title">系统诊断</div>
+                <div class="tool-description">
+                    全面检查系统状态，包括文件加载、本地存储、CSS/JS功能测试等。
+                </div>
+                <span class="tool-badge info">详细</span>
+            </a>
+
+            <a href="test-dialog.html" class="tool-card">
+                <div class="tool-icon">🎭</div>
+                <div class="tool-title">对话框测试</div>
+                <div class="tool-description">
+                    测试对话框是否能正常显示，检查CSS样式是否正确加载。
+                </div>
+                <span class="tool-badge info">测试</span>
+            </a>
+
+            <a href="javascript:void(0)" onclick="openConsole()" class="tool-card">
+                <div class="tool-icon">🐛</div>
+                <div class="tool-title">开发者控制台</div>
+                <div class="tool-description">
+                    打开浏览器开发者工具，查看详细的调试信息和错误日志。
+                </div>
+                <span class="tool-badge info">高级</span>
+            </a>
+        </div>
+
+        <h2 class="section-title">📚 帮助文档</h2>
+        
+        <div class="info-box">
+            <h2>🆘 遇到问题？</h2>
+            <ul>
+                <li>对话框无法弹出 → 使用"一键修复"</li>
+                <li>登录框不显示 → 尝试"强制刷新"</li>
+                <li>页面显示异常 → 运行"系统诊断"</li>
+                <li>功能无法使用 → 打开"开发者控制台"查看错误</li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h2>💡 常见解决方案</h2>
+            <ul>
+                <li>清除浏览器缓存：按 Ctrl+Shift+Delete</li>
+                <li>强制刷新页面：按 Ctrl+F5 (Windows) 或 Cmd+Shift+R (Mac)</li>
+                <li>使用隐私模式：按 Ctrl+Shift+N (Chrome) 或 Ctrl+Shift+P (Firefox)</li>
+                <li>更新浏览器：确保使用最新版本</li>
+                <li>检查网络连接：确保网络稳定</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="index.html" class="back-button">← 返回主页</a>
+        </div>
+    </div>
+
+    <script>
+        function clearAndReload() {
+            if (confirm('这将清除所有本地数据。确定继续吗？')) {
+                // 清除localStorage
+                localStorage.clear();
+                
+                // 清除sessionStorage
+                sessionStorage.clear();
+                
+                // 重新加载
+                alert('缓存已清除！点击确定后将重新加载页面。');
+                window.location.reload(true);
+            }
+        }
+
+        function openConsole() {
+            alert('即将打开开发者工具。\n\n' +
+                  '快捷键：\n' +
+                  '- Windows: F12 或 Ctrl+Shift+I\n' +
+                  '- Mac: Cmd+Option+I\n\n' +
+                  '请切换到"控制台"(Console)标签查看日志。');
+            
+            // 尝试打开开发者工具（某些浏览器支持）
+            if (typeof window.open === 'function') {
+                console.log('开发者工具已打开');
+                console.log('请查看此处的日志信息');
+                console.log('====================================');
+                console.log('系统诊断信息：');
+                console.log('- 浏览器:', navigator.userAgent);
+                console.log('- 语言:', navigator.language);
+                console.log('- 在线:', navigator.onLine);
+                console.log('- LocalStorage 项目数:', Object.keys(localStorage).length);
+                console.log('====================================');
+            }
+        }
+
+        // 显示当前系统状态
+        console.log('🛠️ ASK Uon 系统工具已加载');
+        console.log('可用工具:');
+        console.log('1. fix.html - 一键修复');
+        console.log('2. diagnose.html - 系统诊断');
+        console.log('3. test-dialog.html - 对话框测试');
+    </script>
+</body>
+</html>
+
